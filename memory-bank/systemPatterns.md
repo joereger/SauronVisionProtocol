@@ -7,8 +7,9 @@ The SauronVisionProtocol system follows a client-server architecture with the fo
 ```mermaid
 graph TD
     subgraph "Client Applications"
-        M[macOS Client] --> P[Protocol Handler]
-        W[Windows Client] --> P
+        C[Console Client] --> P[Protocol Handler]
+        M[macOS Client<br/>(planned)] --> P
+        W[Windows Client<br/>(planned)] --> P
         P --> UI[User Interface]
     end
     
@@ -21,6 +22,8 @@ graph TD
     
     P <--> NL
 ```
+
+This architecture has been implemented and tested with the console client successfully connecting to the deployed server in Azure Kubernetes Service.
 
 ### Key Components
 
@@ -64,33 +67,42 @@ CommandInvoker (Client) -> Command Interface -> ConcreteCommand -> CommandReceiv
 
 ### Client Side
 
-- **Platform Layer**: Contains platform-specific implementations (macOS/Windows)
-  - Responsible for native UI rendering
+- **Platform Layer**: Contains platform-specific implementations
+  - ✅ Implemented: Console-based client for cross-platform usage
+  - Planned: Native UI rendering for macOS/Windows
   - Handles OS-specific networking considerations
   
 - **Protocol Layer**: Platform-agnostic implementation of SVP
-  - Handles command formatting and transmission
-  - Processes received responses
-  - Manages connection state
-
-- **UI Layer**: Presents themed interface to users
-  - Displays connection status
-  - Provides command input mechanisms
-  - Renders server responses
+  - ✅ Implemented: TCP/IP client with event-based architecture
+  - ✅ Implemented: Command formatting and transmission
+  - ✅ Implemented: Response processing and parsing
+  - ✅ Implemented: Connection state management
+  
+- **UI Layer**: Presents interface to users
+  - ✅ Implemented: Console-based menu system
+  - ✅ Implemented: Connection status display
+  - ✅ Implemented: Command input mechanisms
+  - ✅ Implemented: Response visualization
+  - Planned: Graphical interface with three-panel layout
 
 ### Server Side
 
 - **Listener Layer**: Accepts and manages TCP/IP connections
-  - Implements socket handling
-  - Manages connection lifecycle
+  - ✅ Implemented: Socket handling and connection management
+  - ✅ Implemented: Connection lifecycle with proper cleanup
+  - ✅ Implemented: Welcome message on connection establishment
   
 - **Processing Layer**: Interprets and executes commands
-  - Validates command format
-  - Executes business logic based on command type
+  - ✅ Implemented: Command parsing and validation
+  - ✅ Implemented: PALANTIR_GAZE command handling
+  - ✅ Implemented: Error handling for invalid commands
+  - Planned: Additional command implementations
   
 - **Response Layer**: Generates themed responses
-  - Formats data according to protocol
-  - Adds thematic elements to responses
+  - ✅ Implemented: Protocol-compliant response formatting
+  - ✅ Implemented: Themed Lord of the Rings content generation
+  - ✅ Implemented: Status codes and response types
+  - Planned: Enhanced themed content and additional response types
 
 ## Technical Implementation Paths
 
@@ -195,9 +207,10 @@ graph LR
     end
     
     subgraph "CI/CD (GitHub Actions)"
-        GR --> Build[Build .NET Container]
-        Build --> Test[Run Tests]
-        Test --> Push[Push to ACR]
+        GR --> PathFilter[Path-based Filter]
+        PathFilter -->|Server/Shared changes| Build[Build .NET Container]
+        PathFilter -->|Other changes| Skip[Skip Build]
+        Build --> Push[Push to ACR]
     end
     
     subgraph "Azure"
@@ -208,23 +221,28 @@ graph LR
     
     subgraph "Client Distribution"
         GR --> BuildClients[Build Client Apps]
-        BuildClients --> MC[macOS Client]
-        BuildClients --> WC[Windows Client]
+        BuildClients --> CC[Console Client]
+        BuildClients -.-> MC[macOS Client<br/>(planned)]
+        BuildClients -.-> WC[Windows Client<br/>(planned)]
     end
 ```
 
-This deployment architecture implements a fully automated CI/CD pipeline through GitHub Actions. When changes are pushed to the repository:
+This deployment architecture implements a fully automated CI/CD pipeline through GitHub Actions. The system now includes an optimized workflow with path-based filtering:
 
-1. GitHub Actions automatically builds the Docker container for the server component
-2. Runs automated tests to verify functionality
-3. Pushes the container image to Azure Container Registry (ACR)
-4. Updates the deployment on Azure Kubernetes Service (AKS)
+1. When changes are pushed to the repository, the workflow checks which files were modified
+2. If server or shared protocol files are changed, the workflow triggers a build
+3. GitHub Actions builds the Docker container for the server component
+4. Pushes the container image to Azure Container Registry (ACR)
+5. Updates the deployment on Azure Kubernetes Service (AKS)
+6. If only client files are changed, the server build and deployment are skipped
 
-This approach provides:
-- Consistent, repeatable deployments
-- Version control for both code and container images
-- Automated testing as part of the deployment pipeline
-- Scalable infrastructure management through Kubernetes
-- Separation between server-side and client-side deployment processes
+This optimized approach provides:
+- ✅ Efficient resource usage by avoiding unnecessary builds
+- ✅ Faster feedback cycles for client-only changes
+- ✅ Consistent, repeatable deployments for server components
+- ✅ Version control for both code and container images
+- ✅ Scalable infrastructure management through Kubernetes
+- ✅ Clear separation between server-side and client-side deployment processes
+- ✅ Manual trigger option for full deployments when needed
 
-Since development will be primarily on macOS without all runtimes installed locally, this pipeline is essential for testing and deployment.
+This pipeline has been successfully implemented and tested, with the server component deployed and verified in Azure Kubernetes Service.

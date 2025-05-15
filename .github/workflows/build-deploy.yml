@@ -3,10 +3,18 @@ name: Build and Deploy
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'server/**'
+      - 'shared/**'
+      - '.github/workflows/build-deploy.yml'
   pull_request:
     branches: [ master ]
+    paths:
+      - 'server/**'
+      - 'shared/**'
+      - '.github/workflows/build-deploy.yml'
   workflow_dispatch:
-    # Manual trigger
+    # Manual trigger (will run regardless of which files were changed)
 
 env:
   # Docker and Azure registry settings
