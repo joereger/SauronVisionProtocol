@@ -230,16 +230,18 @@ Our TCP/IP server needs to be accessible from external clients. Kubernetes provi
    apiVersion: v1
    kind: Service
    metadata:
-     name: sauron-vision-protocol
-     namespace: default
+     name: sauronvisionprotocol
+     labels:
+       app: sauronvisionprotocol
    spec:
-     selector:
-       app: sauron-vision-protocol
+     type: LoadBalancer
      ports:
      - port: 9000
        targetPort: 9000
        protocol: TCP
-     type: LoadBalancer
+       name: tcp-socket
+     selector:
+       app: sauronvisionprotocol
    ```
 
 2. Apply the service configuration:
@@ -249,7 +251,7 @@ Our TCP/IP server needs to be accessible from external clients. Kubernetes provi
 
 3. Get the external IP address (this may take a few minutes to provision):
    ```bash
-   kubectl get services sauron-vision-protocol
+   kubectl get services sauronvisionprotocol
    ```
    Look for the "EXTERNAL-IP" column. Initially, it might show `<pending>` while Azure provisions the load balancer.
 
@@ -273,12 +275,12 @@ If you have issues connecting to the service:
 
 1. Check service status:
    ```bash
-   kubectl describe service sauron-vision-protocol
+   kubectl describe service sauronvisionprotocol
    ```
 
 2. Ensure the pod is running:
    ```bash
-   kubectl get pods --selector=app=sauron-vision-protocol
+   kubectl get pods --selector=app=sauronvisionprotocol
    ```
 
 3. Check pod logs:
@@ -438,7 +440,7 @@ Congratulations! You've now set up the complete Azure infrastructure for the Sau
 3. **Test the Deployed Server**:
    - Get the external IP of your service:
      ```bash
-     kubectl get services sauron-vision-protocol
+     kubectl get services sauronvisionprotocol
      ```
    - Test connectivity with the server using the test script:
      ```bash
