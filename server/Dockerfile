@@ -1,18 +1,19 @@
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-# Copy csproj and restore dependencies
-COPY ["src/*.csproj", "./"]
-RUN dotnet restore
+# Copy csproj files and restore dependencies
+COPY ["src/SauronVisionProtocol.Server.csproj", "src/"]
+COPY ["shared/protocol/SauronVisionProtocol.Shared.csproj", "shared/protocol/"]
+RUN dotnet restore "src/SauronVisionProtocol.Server.csproj"
 
 # Copy everything else and build
-COPY ["src/", "./"]
-RUN dotnet build -c Release -o /app/build
+COPY . .
+RUN dotnet build "src/SauronVisionProtocol.Server.csproj" -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish "src/SauronVisionProtocol.Server.csproj" -c Release -o /app/publish
 
 # Final stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
