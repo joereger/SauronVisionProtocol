@@ -187,7 +187,7 @@ You need to store the credentials from the service principal and ACR as GitHub s
 Add the following **repository secrets** (not environment secrets):
 
 - `AZURE_CREDENTIALS`: The entire JSON output from the service principal creation (copy and paste the complete JSON including curly braces)
-- `AZURE_SUBSCRIPTION`: Your subscription ID (`1a203572-db57-4777-a691-5d61b0c42994`)
+- `AZURE_SUBSCRIPTION`: Your subscription ID (from the output of `az account show --query id -o tsv`)
 - `AZURE_RESOURCE_GROUP`: The resource group name (`sauron-vision-protocol-rg`)
 - `AKS_CLUSTER_NAME`: The AKS cluster name (`sauron-vision-protocol-aks`)
 
@@ -221,9 +221,78 @@ Then add these as GitHub secrets as well:
 
 ## 7. Configure Network Settings
 
-By default, our Kubernetes service is configured to create a LoadBalancer service, which will automatically provision an external IP address for accessing the TCP/IP server.
+Our TCP/IP server needs to be accessible from external clients. Kubernetes provides several ways to expose services, with LoadBalancer being the recommended approach for Azure:
+
+### Creating a LoadBalancer Service
+
+1. Create or review the Kubernetes service configuration in `server/kubernetes/service.yaml`:
+   ```yaml
+   apiVersion: v1
+   kind: Service
+   metadata:
+     name: sauron-vision-protocol
+     namespace: default
+   spec:
+     selector:
+       app: sauron-vision-protocol
+     ports:
+     - port: 9000
+       targetPort: 9000
+       protocol: TCP
+     type: LoadBalancer
+   ```
+
+2. Apply the service configuration:
+   ```bash
+   kubectl apply -f server/kubernetes/service.yaml
+   ```
+
+3. Get the external IP address (this may take a few minutes to provision):
+   ```bash
+   kubectl get services sauron-vision-protocol
+   ```
+   Look for the "EXTERNAL-IP" column. Initially, it might show `<pending>` while Azure provisions the load balancer.
+
+4. Once provisioned, you can connect to the TCP/IP server at this external IP on port 9000, and test connectivity with:
+   ```bash
+   nc -vz [EXTERNAL-IP] 9000
+   ```
+
+### Network Security Considerations
+
+By default, the LoadBalancer exposes your service to the public internet. For production environments, consider:
+
+- Adding network policies to restrict traffic
+- Using Azure Private Link for private connectivity
+- Implementing TLS for encrypted communications
+- Setting up Azure Firewall to control inbound/outbound traffic
+
+### Troubleshooting Network Connectivity
+
+If you have issues connecting to the service:
+
+1. Check service status:
+   ```bash
+   kubectl describe service sauron-vision-protocol
+   ```
+
+2. Ensure the pod is running:
+   ```bash
+   kubectl get pods --selector=app=sauron-vision-protocol
+   ```
+
+3. Check pod logs:
+   ```bash
+   kubectl logs [pod-name]
+   ```
+
+4. Verify that your AKS Network Security Group (NSG) allows traffic on port 9000
 
 ## 8. Monitoring Setup
+
+Monitoring is essential for production workloads to track performance, detect issues, and gather insights about your application's operations.
+
+### Enable Azure Monitor for Containers
 
 Enable monitoring for your AKS cluster:
 
@@ -234,6 +303,50 @@ az aks enable-addons \
   --name sauron-vision-protocol-aks \
   --addons monitoring
 ```
+
+This integrates Azure Monitor and logs analytics with your AKS cluster, collecting:
+- Container metrics (CPU, memory, etc.)
+- Container logs
+- Node performance metrics
+- Control plane logs
+
+### Viewing Monitoring Data
+
+1. Access the monitoring dashboard in the Azure Portal:
+   - Go to your Azure Portal
+   - Navigate to your AKS cluster resource
+   - Select "Insights" or "Monitoring" from the left menu
+
+2. Key monitoring views:
+   - **Cluster metrics**: Overall CPU/memory usage across all nodes
+   - **Node performance**: Metrics for individual nodes
+   - **Container logs**: Application-specific logs
+   - **Kubernetes events**: System-level events for troubleshooting
+
+### Setting Up Alerts
+
+You can configure alerts based on metrics thresholds:
+
+```bash
+# Example: Create an alert for high CPU usage
+az monitor metrics alert create \
+  --name "aks-high-cpu-alert" \
+  --resource-group sauron-vision-protocol-rg \
+  --scopes $(az aks show -g sauron-vision-protocol-rg -n sauron-vision-protocol-aks --query id -o tsv) \
+  --condition "avg percentage CPU > 80" \
+  --window-size 5m \
+  --evaluation-frequency 1m \
+  --description "Alert when CPU exceeds 80% for 5 minutes"
+```
+
+### Logging for SauronVisionProtocol
+
+Our server application is configured to use structured logging (Serilog) that integrates well with Azure Monitor. Key logging areas:
+
+- Connection events (client connect/disconnect)
+- Command processing
+- Error conditions
+- Performance metrics
 
 ## 9. Cleanup (When No Longer Needed)
 
@@ -287,3 +400,56 @@ For development and testing purposes, you can:
 - Use a single-node AKS cluster
 - Stop the cluster when not in use
 - Use a free tier ACR if you don't need high availability
+
+## 12. Conclusion and Next Steps
+
+Congratulations! You've now set up the complete Azure infrastructure for the SauronVisionProtocol project. Here's a summary of what you've accomplished:
+
+- Registered required Azure resource providers
+- Created a resource group for project resources
+- Provisioned an Azure Container Registry for Docker images
+- Deployed an Azure Kubernetes Service cluster
+- Created a service principal for GitHub Actions
+- Configured GitHub secrets for CI/CD pipeline
+- Set up network configuration for TCP/IP communication
+- Enabled monitoring for the AKS cluster
+
+### Next Steps
+
+1. **Deploy the Server Component**:
+   ```bash
+   # Navigate to the server directory
+   cd server
+   
+   # Apply the Kubernetes deployment and service
+   kubectl apply -f kubernetes/deployment.yaml
+   kubectl apply -f kubernetes/service.yaml
+   
+   # Check deployment status
+   kubectl get deployments
+   kubectl get services
+   ```
+
+2. **Set Up CI/CD Pipeline**:
+   - Ensure your GitHub Actions workflow (`.github/workflows/build-deploy.yml`) is configured correctly
+   - Push code changes to trigger the CI/CD pipeline
+   - Monitor the GitHub Actions tab for build and deployment status
+
+3. **Test the Deployed Server**:
+   - Get the external IP of your service:
+     ```bash
+     kubectl get services sauron-vision-protocol
+     ```
+   - Test connectivity with the server using the test script:
+     ```bash
+     ./server/test-client.sh [EXTERNAL-IP] 9000
+     ```
+
+4. **Develop the Client Application**:
+   - Configure client to connect to the server's external IP
+   - Test protocol communication end-to-end
+
+5. **Refine and Extend**:
+   - Add more commands to the protocol
+   - Enhance monitoring and alerting
+   - Implement security improvements
