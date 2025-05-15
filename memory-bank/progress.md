@@ -112,16 +112,17 @@ The project roadmap includes:
 
 ### Client Components
 
-**Status**: Partially Implemented
-**Progress**: 40%
+**Status**: Implemented
+**Progress**: 70%
 
 - ✅ Functional console client implemented
 - ✅ TCP/IP protocol client implemented
 - ✅ Command processing and response visualization
 - ✅ End-to-end testing with server completed
-- ✅ Three-panel GUI design completed 
-- ⏳ Avalonia UI client implementation in progress
-- Graphical implementation underway
+- ✅ Avalonia UI client implemented with three-panel layout.
+- ✅ UI layout refined with equal column widths, updated headers.
+- ✅ Animated GIF images for connection status successfully implemented.
+- ✅ Communication with Azure server verified.
 
 ### Protocol Specification
 
@@ -168,8 +169,9 @@ Several technical challenges have been identified and addressed:
 1. ✅ **TCP/IP in Serverless**: Resolved by using Azure Kubernetes Service instead of serverless options for more robust TCP socket support.
 
 2. ✅ **Cross-Platform UI Framework**: Encountered significant issues with .NET MAUI on macOS Apple Silicon - resolved by switching to Avalonia UI which offers better native support.
+3. ✅ **Image Display in Avalonia**: Resolved issues with displaying images by switching to GIF format and using `avares://` URI scheme, ensuring `AvaloniaResource` inclusion.
 
-3. ⏳ **Protocol Extensibility**: Balancing simplicity of initial implementation with future extensibility needs.
+4. ⏳ **Protocol Extensibility**: Balancing simplicity of initial implementation with future extensibility needs.
 
 ## Evolution of Project Decisions
 
@@ -215,11 +217,10 @@ This section tracks significant project decisions and their evolution over time.
 
 ## Next Milestones
 
-1. **Client Implementation** (Target: +2 weeks)
-   - Set up .NET MAUI project structure
-   - Implement three-panel UI layout
-   - Develop protocol visualization components
-   - Connect client to server
+1. **Client Enhancements** (Target: +1 week)
+   - Implement real TCP/IP socket client (replacing mock).
+   - Add more robust error handling.
+   - Add support for all defined command types.
 
 2. **Protocol Extension** (Target: +1 week)
    - Implement additional commands beyond PALANTIR_GAZE

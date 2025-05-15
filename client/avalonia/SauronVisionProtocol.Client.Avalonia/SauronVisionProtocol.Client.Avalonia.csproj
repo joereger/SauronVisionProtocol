@@ -21,6 +21,8 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <EmbeddedResource Include="Assets\Images\eye-connected.gif" />
+    <EmbeddedResource Include="Assets\Images\eye-disconnected.gif" />
   </ItemGroup>
 
   <ItemGroup>

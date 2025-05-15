@@ -25,6 +25,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _connectionStatus = "Disconnected";
+    
+    // UI properties
+    [ObservableProperty]
+    private string _eyeImageSource = "avares://SauronVisionProtocol.Client.Avalonia/Assets/Images/eye-disconnected.gif";
 
     // Command properties
     [ObservableProperty]
@@ -68,6 +72,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ConnectionStatus = "Connected";
         StatusText = "Connected to server";
         CommandOutputText += "\nSuccessfully connected!";
+        EyeImageSource = "avares://SauronVisionProtocol.Client.Avalonia/Assets/Images/eye-connected.gif";
     }
     
     private void OnClientDisconnected(object? sender, EventArgs e)
@@ -76,6 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ConnectionStatus = "Disconnected";
         StatusText = "Disconnected from server";
         CommandOutputText += "\nDisconnected from server.";
+        EyeImageSource = "avares://SauronVisionProtocol.Client.Avalonia/Assets/Images/eye-disconnected.gif";
     }
     
     private void OnResponseReceived(object? sender, ResponseReceivedEventArgs e)

@@ -13,45 +13,58 @@ We have successfully:
    - Server: .NET 9 on Azure Kubernetes Service
    - Client: Avalonia UI for cross-platform (macOS/Windows) compatibility
    - Protocol: Text-based TCP/IP custom protocol
-3. Created initial client-side UI implementation:
+3. Created functional client-side UI implementation:
    - Three-panel layout (Commands, Protocol Interaction, Connection Management)
    - MVVM architecture with proper dependency injection
    - Mock protocol client service for development
-4. Defined the protocol structure:
+4. Defined and implemented the protocol structure:
    - Command format (command_name [parameters])
    - Response format (status_code response_type "message")
    - Three initial commands: PALANTIR_GAZE, EYE_OF_SAURON, RING_COMMAND
+5. Successfully established communication between client and Azure server.
+6. Fixed server-side implementation to use the updated protocol model.
+7. **Completed UI Enhancements**:
+   - Restructured to a three-panel layout with equal column widths.
+   - Moved command input to the left panel.
+   - Updated column headers ("Local Avalonia App", "SVP Communications", "Server Azure App").
+   - Successfully implemented animated GIF images (Eye of Sauron) for connection status, using correct Avalonia resource paths (`avares://`).
 
 ## Recent Changes
 
 1. **Client Framework Decision**: We initially considered .NET MAUI but switched to Avalonia UI when we discovered MAUI has limitations on macOS (especially Apple Silicon).
    
-2. **Protocol Design**: Implemented a text-based protocol with JSON-like structure for readability and debugging.
+2. **Protocol Design**: Implemented a text-based protocol with structured format for readability and debugging.
    
 3. **UI Pattern**: Adopted a three-panel layout showing:
-   - Available commands (left panel)
-   - Command output and interaction (center panel)
-   - Connection management (right panel)
+   - Available commands and command input (left panel)
+   - Protocol communication log (center panel)
+   - Connection management and server status (right panel)
 
 4. **Protocol Implementation**: Created shared command and response models in the protocol library.
+
+5. **Server Connection**: Updated client defaults to connect to the Azure-hosted server (sauronvisionprotocol.eastus.cloudapp.azure.com:9000).
+
+6. **Protocol Enhancement**: Extended the protocol with additional themed responses based on command types and parameters.
+
+7. **Image Display Fix**: Resolved issues with displaying images in Avalonia by:
+    - Switching from WebP to GIF format.
+    - Using the `avares://<AssemblyName>/<PathToResource>` URI scheme for image sources.
+    - Ensuring images are included as `AvaloniaResource` in the `.csproj` file.
+    - Simplifying XAML by removing problematic converters and using direct `Image` controls with `IsVisible` binding.
 
 ## Next Steps
 
 ### Immediate Tasks
 
-1. **Implement real protocol client**:
-   - Add real TCP/IP socket implementation
-   - Connect to mock server for testing
+2. **Protocol Implementation Completion**:
+   - Implement real TCP/IP socket client (replacing mock implementation)
+   - Add comprehensive error handling
+   - Add support for all command types
 
-2. **Server-side implementation**:
-   - Set up basic server architecture in .NET 9
-   - Create Docker container for deployment to AKS
-   - Configure socket listening and command processing
-
-3. **Protocol Refinement**:
-   - Add validation and error handling
-   - Implement proper command parsing
-   - Add protocol versioning support
+3. **Server Enhancement**:
+   - Improve logging and telemetry
+   - Implement more sophisticated command handling
+   - Add support for concurrent client connections
 
 ### Medium-Term Tasks
 

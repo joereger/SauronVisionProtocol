@@ -1,6 +1,6 @@
 # SauronVisionProtocol (SVP)
 
-A proof-of-concept TCP/IP protocol implementation in .NET 9 with Lord of the Rings / Sauron theming of a MAUI desktop app, deployed on Azure Kubernetes Service via GitHub Actions.  Vibe codin' with Cline inside of VSCode using a combo of Claude 3.7 Sonnet and Gemini 2.5 Pro models... it goes without saying that you should use any of this code at your own risk. 
+A proof-of-concept TCP/IP protocol implementation in .NET 9 with Lord of the Rings / Sauron theming of an Avalonia UI desktop app, deployed on Azure Kubernetes Service via GitHub Actions. Vibe codin' with Cline inside of VSCode using a combo of Claude 3.7 Sonnet and Gemini 2.5 Pro models... it goes without saying that you should use any of this code at your own risk.
 
 ## Project Overview
 
@@ -8,7 +8,7 @@ SauronVisionProtocol (SVP) demonstrates a custom TCP/IP protocol implementation 
 
 - The server runs as a containerized .NET 9 application on Azure Kubernetes Service (AKS)
 - Clients connect and communicate using Lord of the Rings / Sauron-themed commands
-- Cross-platform desktop client built with .NET MAUI provides a technical view of the protocol
+- Cross-platform desktop client built with Avalonia UI provides a technical view of the protocol
 - Deployment is fully automated via GitHub Actions
 
 The protocol transforms technical networking concepts into an engaging, themed experience while showcasing modern cloud-native development practices. The initial implementation focuses on a simple command set and deployment pipeline, which will be expanded upon once the infrastructure is proven.
@@ -23,7 +23,7 @@ The protocol transforms technical networking concepts into an engaging, themed e
 - **Azure Container Registry (ACR)**: For storing and versioning Docker images
 
 ### Client-Side
-- **.NET MAUI**: Cross-platform UI framework for Windows and macOS applications
+- **Avalonia UI**: Cross-platform UI framework for Windows and macOS applications (chosen for better Apple Silicon support)
 - **Protocol Visualization Components**: For monitoring raw TCP/IP communication
 - **Three-Panel Layout**: Client interface, protocol visualization, and server responses
 
@@ -44,11 +44,10 @@ SauronVisionProtocol/
 │   ├── Dockerfile           # Container definition
 │   └── kubernetes/          # Kubernetes deployment manifests
 ├── client/                  # Client applications
-│   ├── src/                 # .NET MAUI application source
+│   ├── avalonia/            # Avalonia UI application source
 │   ├── tests/               # Client tests
-│   └── protocol/            # Protocol implementation
 ├── shared/                  # Shared code between client and server
-│   └── protocol/            # Protocol definitions
+│   └── protocol/            # Protocol definitions and implementation
 ├── .gitignore
 └── README.md                # This file
 ```
@@ -119,11 +118,15 @@ The client application features a three-panel layout:
 +----------------+------------------+------------------+
 ```
 
-- **Left Panel**: Client interface for entering commands and managing connection
-- **Middle Panel**: Protocol visualization showing the raw TCP/IP data flowing between client and server
-- **Right Panel**: Server responses with Sauron-themed formatting
+- **Left Panel (Local Avalonia App)**: Client interface for selecting commands, entering parameters, and managing connection.
+- **Middle Panel (SVP Communications)**: Log of protocol communication, showing commands sent and responses received.
+- **Right Panel (Server Azure App)**: Server connection details and visual status indicator (Eye of Sauron).
 
 This design allows technical users to see both the themed interface and the underlying protocol details simultaneously.
+
+### Avalonia Client GUI
+
+![Sauron Vision Protocol Client GUI](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/AvaloniaGUI.png)
 
 ## Setup Instructions
 
@@ -134,7 +137,7 @@ This design allows technical users to see both the themed interface and the unde
 - Azure Account and CLI
 - Docker Desktop (optional for local testing)
 - .NET 9 SDK (for local development)
-- .NET MAUI workload and SDK
+- Avalonia Templates (see Avalonia documentation for installation)
 
 ### Initial Setup
 
@@ -196,9 +199,26 @@ The initial development will focus on:
 1. **Infrastructure Setup**: Establishing the AKS and ACR resources
 2. **CI/CD Pipeline**: Implementing GitHub Actions for automated deployment
 3. **Simple Server**: Basic TCP/IP server with a single command implementation
-4. **Basic Client**: Minimal .NET MAUI interface with the three-panel layout
+4. **Basic Client**: Minimal Avalonia UI interface with the three-panel layout
 
 This approach allows us to focus on getting the deployment pipeline working correctly before adding complexity to the application logic.
+
+## GitHub Actions
+
+The project uses GitHub Actions for CI/CD. Here are some screenshots of the workflow in action:
+
+**Workflow Run Summary:**
+![GitHub Actions Workflow Run](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/GitHubActions-01.png)
+
+**Build and Deploy Job Details:**
+![GitHub Actions Build and Deploy Job](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/GitHubActions-02.png)
+
+## Azure Resources
+
+The server-side components are deployed to Azure Kubernetes Service (AKS) and utilize Azure Container Registry (ACR).
+
+**Azure Resource Group Overview:**
+![Azure Resources for SVP](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/AzureResources.png)
 
 ## License
 
