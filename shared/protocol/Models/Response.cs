@@ -149,7 +149,7 @@ public class Response
         return new Response(
             400, // Bad Request
             "COMMAND_INVALID_FORMAT", // More specific type
-            "The runes are unreadable; the command format is not recognized by the Dark Lord."
+            "The runes are unreadable; the command format is not recognized by the Dark Lord. GO AWAY!!!!"
         );
     }
 
