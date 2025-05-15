@@ -1,6 +1,6 @@
 # SauronVisionProtocol (SVP)
 
-A proof-of-concept TCP/IP protocol implementation in .NET 9 with Lord of the Rings / Sauron theming, deployed on Azure Kubernetes Service via GitHub Actions.  Joe Reger just playing around here.
+A proof-of-concept TCP/IP protocol implementation in .NET 9 with Lord of the Rings / Sauron theming of a MAUI desktop app, deployed on Azure Kubernetes Service via GitHub Actions.  Vibe codin' with Cline inside of VSCode using a combo of Claude 3.7 Sonnet and Gemini 2.5 Pro models... it goes without saying that you should use any of this code at your own risk. 
 
 ## Project Overview
 
