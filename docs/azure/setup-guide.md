@@ -174,14 +174,50 @@ The output JSON contains the credentials needed for GitHub Actions.
 
 ## 6. Set Up GitHub Secrets
 
-In your GitHub repository, add the following secrets:
+You need to store the credentials from the service principal and ACR as GitHub secrets for your CI/CD pipeline:
 
-- `AZURE_CREDENTIALS`: The entire JSON output from the service principal creation
-- `ACR_SERVER`: The ACR login server URL
-- `ACR_USERNAME`: The ACR username
-- `ACR_PASSWORD`: The ACR password
+### Accessing GitHub Secrets
+
+1. Go to your GitHub repository
+2. Navigate to "Settings" > "Secrets and variables" > "Actions"
+3. Click "New repository secret" button
+
+### Required Secrets
+
+Add the following **repository secrets** (not environment secrets):
+
+- `AZURE_CREDENTIALS`: The entire JSON output from the service principal creation (copy and paste the complete JSON including curly braces)
+- `AZURE_SUBSCRIPTION`: Your subscription ID (`1a203572-db57-4777-a691-5d61b0c42994`)
 - `AZURE_RESOURCE_GROUP`: The resource group name (`sauron-vision-protocol-rg`)
 - `AKS_CLUSTER_NAME`: The AKS cluster name (`sauron-vision-protocol-aks`)
+
+### ACR Credentials
+
+Run these commands to get your ACR credentials:
+
+```bash
+# Get ACR login server
+ACR_SERVER=$(az acr show --name sauronvisionacr --resource-group sauron-vision-protocol-rg --query loginServer --output tsv)
+echo "ACR Server: $ACR_SERVER"
+
+# Get ACR credentials
+ACR_USERNAME=$(az acr credential show --name sauronvisionacr --resource-group sauron-vision-protocol-rg --query username --output tsv)
+ACR_PASSWORD=$(az acr credential show --name sauronvisionacr --resource-group sauron-vision-protocol-rg --query "passwords[0].value" --output tsv)
+
+echo "ACR Username: $ACR_USERNAME"
+echo "ACR Password: $ACR_PASSWORD"
+```
+
+Then add these as GitHub secrets as well:
+- `ACR_SERVER`: The ACR login server URL (typically `sauronvisionacr.azurecr.io`)
+- `ACR_USERNAME`: The ACR username (typically the ACR name)
+- `ACR_PASSWORD`: The ACR password
+
+### Security Considerations
+
+- These secrets are encrypted in GitHub and are only exposed during workflow runs
+- Treat the service principal credentials as sensitive information
+- Avoid displaying these credentials in logs or sharing them in public repositories
 
 ## 7. Configure Network Settings
 

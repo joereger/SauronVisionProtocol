@@ -123,16 +123,17 @@ The project roadmap includes:
 
 ### Infrastructure
 
-**Status**: Operational
-**Progress**: 75%
+**Status**: Complete
+**Progress**: 90%
 
-- Azure resource providers registered
-- Azure Resource Group created
-- Azure Container Registry (ACR) provisioned and configured
-- Azure Kubernetes Service (AKS) cluster deployed and verified
-- Kubectl configured and connected to AKS
-- CI/CD pipeline defined with GitHub Actions
-- GitHub integration and secrets pending
+- ✅ Azure resource providers registered
+- ✅ Azure Resource Group created
+- ✅ Azure Container Registry (ACR) provisioned and configured
+- ✅ Azure Kubernetes Service (AKS) cluster deployed and verified
+- ✅ Kubectl configured and connected to AKS
+- ✅ Service principal created for GitHub Actions
+- ✅ GitHub secrets configured for CI/CD pipeline
+- CI/CD pipeline testing pending
 
 ### Documentation
 
@@ -189,10 +190,10 @@ This section will track significant project decisions and their evolution over t
 
 ## Next Milestones
 
-1. **CI/CD Completion** (Target: +1 week)
-   - Create service principal for GitHub Actions
-   - Configure GitHub repository secrets
-   - Test automated deployment pipeline
+1. **CI/CD Testing** (Target: +1 week)
+   - Test deployment to AKS via GitHub Actions
+   - Verify container deployment and operation
+   - Set up monitoring and logging
 
 2. **Server Component Implementation** (Target: +2 weeks)
    - Implement TCP/IP socket server
