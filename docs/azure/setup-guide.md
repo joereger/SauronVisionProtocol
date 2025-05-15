@@ -8,7 +8,44 @@ This guide walks through setting up the necessary Azure resources for deploying 
 - Azure CLI installed on your development machine
 - `kubectl` command-line tool
 
-## 1. Create Resource Group
+## 1. Resource Provider Registration
+
+Before creating Azure resources, you need to register the required resource providers for your subscription. This is a one-time process for each subscription:
+
+```bash
+# Check registration status of required providers
+az provider show -n Microsoft.ContainerRegistry --query "registrationState" -o tsv
+az provider show -n Microsoft.ContainerService --query "registrationState" -o tsv
+az provider show -n Microsoft.Network --query "registrationState" -o tsv
+az provider show -n Microsoft.Compute --query "registrationState" -o tsv
+az provider show -n Microsoft.Storage --query "registrationState" -o tsv
+```
+
+For any provider showing "NotRegistered", register them using:
+
+```bash
+# Register Container Registry provider (for ACR)
+az provider register --namespace Microsoft.ContainerRegistry
+
+# Register Container Service provider (for AKS)
+az provider register --namespace Microsoft.ContainerService
+
+# Register additional providers required by AKS
+az provider register --namespace Microsoft.Network
+az provider register --namespace Microsoft.Compute
+az provider register --namespace Microsoft.Storage
+```
+
+Registration takes 2-5 minutes for each provider. Check status with:
+
+```bash
+az provider show -n Microsoft.ContainerRegistry --query "registrationState" -o tsv
+# Repeat for other providers
+```
+
+Wait for all providers to show "Registered" before proceeding.
+
+## 2. Create Resource Group
 
 First, create a resource group to contain all related resources:
 
@@ -20,7 +57,7 @@ az login
 az group create --name sauron-vision-protocol-rg --location eastus
 ```
 
-## 2. Create Azure Container Registry (ACR)
+## 3. Create Azure Container Registry (ACR)
 
 Create an ACR to store your Docker container images:
 
@@ -48,7 +85,7 @@ echo "ACR Username: $ACR_USERNAME"
 echo "ACR Password: $ACR_PASSWORD"
 ```
 
-## 3. Create Azure Kubernetes Service (AKS) Cluster
+## 4. Create Azure Kubernetes Service (AKS) Cluster
 
 Create an AKS cluster for running the service:
 
@@ -79,7 +116,7 @@ Verify connectivity:
 kubectl get nodes
 ```
 
-## 4. Create Service Principal for GitHub Actions
+## 5. Create Service Principal for GitHub Actions
 
 To allow GitHub Actions to deploy to AKS, create a service principal:
 
@@ -94,7 +131,7 @@ az ad sp create-for-rbac \
 
 The output JSON contains the credentials needed for GitHub Actions.
 
-## 5. Set Up GitHub Secrets
+## 6. Set Up GitHub Secrets
 
 In your GitHub repository, add the following secrets:
 
@@ -105,11 +142,11 @@ In your GitHub repository, add the following secrets:
 - `AZURE_RESOURCE_GROUP`: The resource group name (`sauron-vision-protocol-rg`)
 - `AKS_CLUSTER_NAME`: The AKS cluster name (`sauron-vision-protocol-aks`)
 
-## 6. Configure Network Settings
+## 7. Configure Network Settings
 
 By default, our Kubernetes service is configured to create a LoadBalancer service, which will automatically provision an external IP address for accessing the TCP/IP server.
 
-## 7. Monitoring Setup
+## 8. Monitoring Setup
 
 Enable monitoring for your AKS cluster:
 
@@ -121,7 +158,7 @@ az aks enable-addons \
   --addons monitoring
 ```
 
-## 8. Cleanup (When No Longer Needed)
+## 9. Cleanup (When No Longer Needed)
 
 To clean up all resources when they're no longer needed:
 
@@ -130,7 +167,36 @@ To clean up all resources when they're no longer needed:
 az group delete --name sauron-vision-protocol-rg --yes --no-wait
 ```
 
-## 9. Cost Management
+## 10. Troubleshooting
+
+### Common Issues and Solutions
+
+#### Resource Provider Registration Errors
+
+If you see an error like:
+```
+(MissingSubscriptionRegistration) The subscription is not registered to use namespace 'Microsoft.X'
+```
+
+This means the required resource provider isn't registered. Follow the registration steps in section 1. Each registration can take several minutes to complete.
+
+#### AKS Creation Takes a Long Time
+
+Creating an AKS cluster typically takes 5-15 minutes. During this time, Azure is provisioning VMs, networking resources, and configuring Kubernetes components.
+
+#### Command Line Continuation with Backslashes
+
+When using multi-line commands with backslashes (`\`), ensure there are no spaces after the backslash, as this can cause command syntax errors in some shells.
+
+#### ResourceNotFound Errors
+
+If a "ResourceNotFound" error occurs when trying to access a resource you just created, it might still be provisioning. Wait a few minutes and try again.
+
+#### Permissions Issues
+
+If you encounter permissions errors, ensure your Azure account has sufficient permissions (Contributor or Owner role) on the subscription.
+
+## 11. Cost Management
 
 The resources deployed in this guide include:
 
