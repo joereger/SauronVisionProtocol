@@ -8,9 +8,10 @@ SauronVisionProtocol (SVP) demonstrates a custom TCP/IP protocol implementation 
 
 - The server runs as a containerized .NET 9 application on Azure Kubernetes Service (AKS)
 - Clients connect and communicate using Lord of the Rings / Sauron-themed commands
+- Cross-platform desktop client built with .NET MAUI provides a technical view of the protocol
 - Deployment is fully automated via GitHub Actions
 
-The protocol transforms technical networking concepts into an engaging, themed experience while showcasing modern cloud-native development practices.
+The protocol transforms technical networking concepts into an engaging, themed experience while showcasing modern cloud-native development practices. The initial implementation focuses on a simple command set and deployment pipeline, which will be expanded upon once the infrastructure is proven.
 
 ## Technology Stack
 
@@ -22,8 +23,9 @@ The protocol transforms technical networking concepts into an engaging, themed e
 - **Azure Container Registry (ACR)**: For storing and versioning Docker images
 
 ### Client-Side
-- Cross-platform client applications (specific framework TBD)
-- Initial focus on macOS development with Windows support planned
+- **.NET MAUI**: Cross-platform UI framework for Windows and macOS applications
+- **Protocol Visualization Components**: For monitoring raw TCP/IP communication
+- **Three-Panel Layout**: Client interface, protocol visualization, and server responses
 
 ## Project Structure
 
@@ -42,9 +44,11 @@ SauronVisionProtocol/
 │   ├── Dockerfile           # Container definition
 │   └── kubernetes/          # Kubernetes deployment manifests
 ├── client/                  # Client applications
-│   ├── common/              # Shared protocol handler code
-│   ├── macos/               # macOS-specific implementation
-│   └── windows/             # Windows-specific implementation
+│   ├── src/                 # .NET MAUI application source
+│   ├── tests/               # Client tests
+│   └── protocol/            # Protocol implementation
+├── shared/                  # Shared code between client and server
+│   └── protocol/            # Protocol definitions
 ├── .gitignore
 └── README.md                # This file
 ```
@@ -101,6 +105,26 @@ Since development occurs on macOS without all required runtimes, the workflow is
 
 This approach ensures consistent testing and deployment regardless of local development environment limitations.
 
+## Client Interface
+
+The client application features a three-panel layout:
+
+```
++----------------+------------------+------------------+
+|                |                  |                  |
+|  CLIENT        |  PROTOCOL        |  SERVER          |
+|  (Command      |  (Network        |  (Sauron's       |
+|   Interface)   |   Visualization) |   Responses)     |
+|                |                  |                  |
++----------------+------------------+------------------+
+```
+
+- **Left Panel**: Client interface for entering commands and managing connection
+- **Middle Panel**: Protocol visualization showing the raw TCP/IP data flowing between client and server
+- **Right Panel**: Server responses with Sauron-themed formatting
+
+This design allows technical users to see both the themed interface and the underlying protocol details simultaneously.
+
 ## Setup Instructions
 
 ### Prerequisites
@@ -110,6 +134,7 @@ This approach ensures consistent testing and deployment regardless of local deve
 - Azure Account and CLI
 - Docker Desktop (optional for local testing)
 - .NET 9 SDK (for local development)
+- .NET MAUI workload and SDK
 
 ### Initial Setup
 
@@ -141,11 +166,15 @@ The SauronVisionProtocol uses a text-based format for commands and responses:
 [COMMAND_NAME] [PARAM1] [PARAM2] ... [PARAMn]
 ```
 
-Example commands:
+Initial implementation will focus on a single simple command:
 ```
-PALANTIR_GAZE gondor
-EYE_OF_SAURON 10 30
-RING_COMMAND nazgul attack
+PALANTIR_GAZE [location]
+```
+
+Additional commands will be added as the project progresses:
+```
+EYE_OF_SAURON [intensity] [duration]
+RING_COMMAND [minion_type] [action]
 ```
 
 ### Responses
@@ -158,7 +187,18 @@ Example response:
 200 VISION_GRANTED "The eye of Sauron turns to Gondor. Armies of 5000 orcs detected."
 ```
 
-A full protocol specification is under development.
+The protocol will be visualized in the client application, showing the raw TCP/IP data alongside the formatted commands and responses.
+
+## Development Approach
+
+The initial development will focus on:
+
+1. **Infrastructure Setup**: Establishing the AKS and ACR resources
+2. **CI/CD Pipeline**: Implementing GitHub Actions for automated deployment
+3. **Simple Server**: Basic TCP/IP server with a single command implementation
+4. **Basic Client**: Minimal .NET MAUI interface with the three-panel layout
+
+This approach allows us to focus on getting the deployment pipeline working correctly before adding complexity to the application logic.
 
 ## License
 

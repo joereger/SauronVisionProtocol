@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sauronvisionprotocol
+  labels:
+    app: sauronvisionprotocol
+spec:
+  type: LoadBalancer  # Exposes the service externally using a cloud provider's load balancer
+  ports:
+  - port: 9000
+    targetPort: 9000
+    protocol: TCP
+    name: tcp-socket
+  selector:
+    app: sauronvisionprotocol

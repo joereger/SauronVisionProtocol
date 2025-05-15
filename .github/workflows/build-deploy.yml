@@ -1,0 +1,102 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    # Manual trigger
+
+env:
+  # Docker and Azure registry settings
+  REGISTRY: ${{ secrets.ACR_SERVER }}
+  IMAGE_NAME: sauronvisionprotocol
+  IMAGE_TAG: ${{ github.sha }}
+  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
+  NAMESPACE: default
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+          
+      - name: Build and Test Server
+        run: |
+          cd server/src
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+          cd ../tests
+          dotnet test --no-restore --verbosity normal
+          
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Login to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+          
+      - name: Build and Push Docker Image
+        run: |
+          cd server
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # Only deploy on main branch
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        
+      - name: Set AKS Context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          cluster-name: ${{ env.CLUSTER_NAME }}
+          
+      - name: Update Kubernetes Manifests
+        run: |
+          cd server/kubernetes
+          
+          # Replace the image tag in deployment files
+          sed -i 's|__IMAGE__|${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}|g' deployment.yaml
+          
+      - name: Deploy to AKS
+        run: |
+          cd server/kubernetes
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
+          
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/sauronvisionprotocol -n ${{ env.NAMESPACE }}
+          
+      - name: Get Service IP
+        run: |
+          echo "Service IP/URL:"
+          kubectl get service sauronvisionprotocol -n ${{ env.NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}'

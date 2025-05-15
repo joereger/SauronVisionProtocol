@@ -44,7 +44,9 @@ As the project is in its initial stage, the following foundational elements are 
 3. **Technology Decisions**:
    - Selected Azure Kubernetes Service (AKS) for server-side hosting
    - Chosen .NET 9 on Linux containers for server implementation
+   - Selected .NET MAUI for cross-platform client development
    - Defined GitHub Actions as the CI/CD pipeline strategy
+   - Designed three-panel layout for protocol visualization
 
 ## What's Left to Build
 
@@ -57,10 +59,10 @@ The project roadmap includes:
    - Network configuration for TCP/IP socket exposure
 
 2. **Protocol Implementation**: ⬜ Not Started
-   - Protocol specification finalization
+   - Initial protocol implementation with single command (PALANTIR_GAZE)
    - Command handler implementation
    - Response formatter implementation
-   - Error handling mechanisms
+   - Protocol visualization in client application
 
 3. **Server Component**: ⬜ Not Started
    - .NET 9 TCP/IP socket listening service
@@ -69,9 +71,9 @@ The project roadmap includes:
    - Logging and monitoring implementation
 
 4. **Client Applications**: ⬜ Not Started
-   - macOS client implementation
-   - Windows client implementation
-   - User interface development
+   - .NET MAUI project setup
+   - Three-panel layout implementation (Client, Protocol, Server)
+   - Protocol visualization components
    - Connection management
    - Command submission and response handling
 
@@ -100,12 +102,13 @@ The project roadmap includes:
 
 ### Client Components
 
-**Status**: Planning Phase
-**Progress**: 0%
+**Status**: Design Phase
+**Progress**: 15%
 
-- Framework evaluation in progress
-- UI mockups not started
-- No implementation started
+- .NET MAUI selected as client framework
+- Three-panel UI layout designed
+- Protocol visualization approach defined
+- Implementation not yet started
 
 ### Protocol Specification
 
@@ -167,24 +170,36 @@ This section will track significant project decisions and their evolution over t
    - Adopted GitHub Actions for CI/CD pipeline to automate deployment to AKS
    - Rationale: Critical for development without all runtimes installed locally, enables consistent testing and deployment
 
+5. **Client Framework Decision**:
+   - Selected .NET MAUI for cross-platform client development
+   - Rationale: Native integration with .NET ecosystem, cross-platform capabilities, modern UI framework
+
+6. **UI Layout Decision**:
+   - Designed three-panel layout (Client, Protocol, Server)
+   - Rationale: Provides clear visualization of the client-server interaction and protocol data flow
+
+7. **Implementation Strategy Decision**:
+   - Focus initially on single command implementation with minimal features
+   - Rationale: Simplifies debugging of deployment pipeline and infrastructure setup
+
 ## Next Milestones
 
-1. **Technology Stack Finalization** (Target: +2 weeks)
-   - Complete evaluation of Azure services
-   - Select client implementation framework
-   - Document all technology decisions
-
-2. **Project Structure Implementation** (Target: +3 weeks)
+1. **Project Structure Implementation** (Target: +1 week)
    - Create directory structure
    - Set up initial configuration files
    - Establish development environment
 
-3. **Protocol Specification** (Target: +4 weeks)
-   - Complete formal protocol documentation
-   - Define all commands and responses
-   - Establish validation rules
+2. **CI/CD Pipeline Setup** (Target: +2 weeks)
+   - Implement GitHub Actions workflow
+   - Configure Azure connectivity
+   - Set up container build and deployment process
 
-4. **Proof of Concept** (Target: +6 weeks)
-   - Implement minimal viable server component
-   - Develop basic client with connection capabilities
-   - Demonstrate end-to-end command execution
+3. **Infrastructure Provisioning** (Target: +3 weeks)
+   - Create Azure Container Registry
+   - Provision Azure Kubernetes Service cluster
+   - Configure networking and access controls
+
+4. **Minimal Viable Implementation** (Target: +5 weeks)
+   - Implement simple TCP/IP server with PALANTIR_GAZE command
+   - Develop basic .NET MAUI client with three-panel layout
+   - Demonstrate end-to-end command execution and protocol visualization
