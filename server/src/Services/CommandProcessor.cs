@@ -26,14 +26,14 @@ public class CommandProcessor : ICommandProcessor
         if (command == null)
         {
             _logger.LogWarning("Invalid command format: {Command}", commandString);
-            return Task.FromResult(Response.CreateErrorResponse("Invalid command format").ToProtocolString());
+            return Task.FromResult(Response.CreateErrorResponse("UNKNOWN_COMMAND", "Invalid command format").ToProtocolString());
         }
         
         // Process based on command type
         Response response = command switch
         {
             PalantirGazeCommand palantirGazeCommand => ProcessPalantirGazeCommand(palantirGazeCommand),
-            _ => Response.CreateErrorResponse($"Unsupported command: {command.CommandName}")
+            _ => Response.CreateErrorResponse(command.CommandName, $"Unsupported command: {command.CommandName}")
         };
         
         _logger.LogInformation("Generated response: {Response}", response.ToProtocolString());
@@ -48,7 +48,7 @@ public class CommandProcessor : ICommandProcessor
         // Check if the location is empty or invalid
         if (string.IsNullOrWhiteSpace(command.Location))
         {
-            return Response.CreateErrorResponse("Location cannot be empty");
+            return Response.CreateErrorResponse(command.CommandName, "Location cannot be empty");
         }
         
         // Generate vision response for the location
