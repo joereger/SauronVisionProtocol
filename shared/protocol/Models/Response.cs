@@ -138,7 +138,7 @@ public class Response
         return new Response(
             400,
             "COMMAND_UNKNOWN",
-            "The Dark Lord does not recognize this command. The Eye turns away in disinterest."
+            "The Dark Lord does not recognize this command. The Eye turns away in disinterest. Go away, fool!"
         );
     }
 
