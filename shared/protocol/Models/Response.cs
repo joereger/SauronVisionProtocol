@@ -21,6 +21,11 @@ public class Response
     public string Message { get; set; }
 
     /// <summary>
+    /// Whether the response indicates success (status code 200-299)
+    /// </summary>
+    public bool IsSuccess => StatusCode >= 200 && StatusCode < 300;
+
+    /// <summary>
     /// Creates a new instance of the Response class
     /// </summary>
     public Response(int statusCode, string responseType, string message)
@@ -61,6 +66,8 @@ public class Response
         return new Response(statusCode, parts[1], message);
     }
 
+    #region Command-specific response creators
+
     /// <summary>
     /// Creates a successful response for the PalantirGaze command
     /// </summary>
@@ -74,16 +81,68 @@ public class Response
     }
 
     /// <summary>
-    /// Creates an error response
+    /// Creates a successful response for the EyeOfSauron command
     /// </summary>
-    public static Response CreateErrorResponse(string errorMessage)
+    public static Response CreateGazeIntensifiedResponse(int intensity)
+    {
+        string message = intensity switch
+        {
+            <= 3 => "The Eye glows with renewed focus, searching the lands with subtle vigilance.",
+            <= 6 => "The Eye burns brighter, its gaze piercing through clouds and darkness.",
+            <= 9 => "The fiery Eye blazes with terrible might, striking fear into all who feel its gaze.",
+            _ => "The lidless Eye erupts with blinding power, a beacon of malice visible across all of Middle-earth!"
+        };
+        
+        return new Response(200, "GAZE_INTENSIFIED", message);
+    }
+    
+    /// <summary>
+    /// Creates a successful response for the RingCommand
+    /// </summary>
+    public static Response CreateMinionsObeyingResponse(string action)
+    {
+        string message = action.ToLowerInvariant() switch
+        {
+            "march" or "advance" => "The armies of Mordor march forth, the ground trembling beneath countless feet.",
+            "attack" or "destroy" => "The servants of Sauron attack with savage fury, leaving only ruin in their wake.",
+            "retreat" or "withdraw" => "The forces of darkness pull back into shadow, regrouping for a future assault.",
+            "scout" or "search" => "Dark riders and fell creatures disperse, seeking the quarry with relentless determination.",
+            "build" or "forge" => "The forges of Mordor burn hotter, weapons and armor crafted for the coming war.",
+            _ => $"The servants of Sauron hear the call of the One Ring and move to {action}. The darkness spreads."
+        };
+        
+        return new Response(200, "MINIONS_OBEYING", message);
+    }
+
+    /// <summary>
+    /// Creates an error response for commands that fail
+    /// </summary>
+    public static Response CreateErrorResponse(string commandName, string errorMessage)
+    {
+        string responseType = commandName.ToUpperInvariant() switch
+        {
+            "PALANTIR_GAZE" => "VISION_DENIED",
+            "EYE_OF_SAURON" => "GAZE_UNCHANGED",
+            "RING_COMMAND" => "MINIONS_RESISTING",
+            _ => "COMMAND_FAILED"
+        };
+        
+        return new Response(500, responseType, errorMessage);
+    }
+    
+    /// <summary>
+    /// Creates a response for unknown commands
+    /// </summary>
+    public static Response CreateUnknownCommandResponse()
     {
         return new Response(
-            500,
-            "VISION_DENIED",
-            errorMessage
+            400,
+            "COMMAND_UNKNOWN",
+            "The Dark Lord does not recognize this command. The Eye turns away in disinterest."
         );
     }
+
+    #endregion
 
     /// <summary>
     /// Generates a themed description based on the location
@@ -100,6 +159,10 @@ public class Response
             "minas tirith" => "The white tower gleams. Guards of the citadel patrol the seven levels.",
             "moria" => "Ancient dwarf halls now overrun with goblins and darker things below.",
             "lothlorien" => "Elvish magic obscures clear vision. The golden wood hides many secrets.",
+            "helm's deep" => "The fortress is preparing for battle. Their walls are strong but their numbers few.",
+            "rivendell" => "The hidden valley is protected by elvish magic. Council meetings detected.",
+            "fangorn" => "The ancient forest stirs with anger. The trees themselves may pose a threat.",
+            "erebor" => "The dwarven stronghold is fortified. Their treasure room contains vast wealth.",
             _ => $"Unknown territories observed. Sending scouts to investigate {location}."
         };
     }

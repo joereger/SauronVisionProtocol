@@ -23,18 +23,23 @@
 ### Client-Side Technologies
 
 1. **Cross-Platform Framework**:
-   - To be determined based on compatibility with .NET 9 backend
-   - Focus on macOS development initially, with Windows support planned
+   - Avalonia UI - .NET-based cross-platform UI framework
+   - Skia graphics rendering for consistent cross-platform visuals
+   - Native Apple Silicon (ARM64) support for macOS
+   - Windows compatibility for future expansion
 
 2. **UI/UX**:
-   - Modern UI framework (React if using Electron, or platform-appropriate UI toolkit)
-   - Responsive design to accommodate different window sizes
-   - Themed visual components aligned with Lord of the Rings/Sauron aesthetic
+   - XAML-based declarative UI design
+   - MVVM (Model-View-ViewModel) architecture
+   - ReactiveUI for reactive programming patterns
+   - Three-panel layout with themed visual components
+   - Lord of the Rings/Sauron aesthetic for visual design
 
 3. **Networking**:
-   - Platform-appropriate socket libraries
-   - Connection state management
-   - Error handling and retry logic
+   - .NET TcpClient for socket management
+   - Event-based asynchronous communication
+   - Connection state management with proper error handling
+   - Retry logic for unreliable network conditions
 
 ## Development Setup
 
@@ -70,8 +75,11 @@
    # Configure Azure credentials
    az login
    
-   # Local development may not have all runtimes installed
-   # Focus will be on GitHub Actions deployment pipeline for testing
+   # Install Avalonia templates
+   dotnet new install Avalonia.Templates
+   
+   # For Avalonia project setup
+   dotnet new avalonia.mvvm -o client/avalonia
    
    # For local testing with Docker (if available):
    docker build -t svp-server:dev .
@@ -92,8 +100,9 @@
    - Service limits and quotas to be monitored
 
 2. **Cross-Platform Compatibility**:
-   - UI must be consistent across macOS and Windows
-   - Networking code must handle platform-specific nuances
+   - Avalonia UI ensures consistent rendering across macOS and Windows
+   - Native Apple Silicon (ARM64) support is critical for performance
+   - Packaging and distribution requirements vary between platforms
    - Installation process needs to be streamlined for both platforms
 
 3. **Protocol Design**:
@@ -128,9 +137,31 @@
 
 ### Client Dependencies
 
-To be determined based on the selected client framework.
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
 
-*Note*: Actual dependencies will be finalized once implementation approach is decided.
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.0.5" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.5" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.5" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\protocol\SauronVisionProtocol.Shared.csproj" />
+  </ItemGroup>
+</Project>
+```
 
 ## Tool Usage Patterns
 

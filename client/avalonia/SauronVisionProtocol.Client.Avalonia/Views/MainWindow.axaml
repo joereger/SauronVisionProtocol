@@ -1,0 +1,93 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SauronVisionProtocol.Client.Avalonia.ViewModels"
+        xmlns:models="using:SauronVisionProtocol.Client.Avalonia.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+        x:Class="SauronVisionProtocol.Client.Avalonia.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Sauron Vision Protocol"
+        MinWidth="900" MinHeight="500">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <!-- Main Grid with Three Panels -->
+    <Grid ColumnDefinitions="250,*,250">
+        <!-- Left Panel: Command List -->
+        <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Commands" Margin="10" FontWeight="Bold"/>
+                <ListBox ItemsSource="{Binding AvailableCommands}" 
+                         SelectedItem="{Binding SelectedCommand}"
+                         Margin="5">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:Command">
+                            <TextBlock Text="{Binding Name}" ToolTip.Tip="{Binding Description}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+        
+        <!-- Center Panel: Command Input/Output -->
+        <Grid Grid.Column="1" RowDefinitions="*,Auto,Auto">
+            <!-- Command Output Area -->
+            <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="1" Margin="10">
+                <ScrollViewer>
+                    <TextBlock Text="{Binding CommandOutputText}" 
+                              TextWrapping="Wrap" 
+                              Margin="5"/>
+                </ScrollViewer>
+            </Border>
+                
+            <!-- Command Input Area -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,0,10,10" Spacing="5">
+                <TextBox Text="{Binding CommandText}" Width="400" Watermark="Enter command..."/>
+                <Button Content="Send" Command="{Binding SendCommandCommand}"/>
+            </StackPanel>
+            
+            <!-- Status Area -->
+            <Border Grid.Row="2" BorderBrush="Gray" BorderThickness="0,1,0,0">
+                <TextBlock Text="{Binding StatusText}" Margin="10,5"/>
+            </Border>
+        </Grid>
+        
+        <!-- Right Panel: Connection Info -->
+        <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1,0,0,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Connection" Margin="10" FontWeight="Bold"/>
+                <StackPanel Margin="10">
+                    <TextBlock Text="Server Host:"/>
+                    <TextBox Text="{Binding ServerHost}" Margin="0,0,0,10"/>
+                    
+                    <TextBlock Text="Port:"/>
+                    <TextBox Text="{Binding ServerPort}" Margin="0,0,0,10"/>
+                    
+                    <Button Content="Connect" 
+                            Command="{Binding ConnectCommand}" 
+                            IsEnabled="{Binding !IsConnected}"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,5,0,5"/>
+                            
+                    <Button Content="Disconnect" 
+                            Command="{Binding DisconnectCommand}" 
+                            IsEnabled="{Binding IsConnected}"
+                            HorizontalAlignment="Stretch"/>
+                            
+                    <Border BorderBrush="Gray" BorderThickness="1" Margin="0,20,0,0" Padding="5">
+                        <StackPanel>
+                            <TextBlock Text="Status:" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding ConnectionStatus}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

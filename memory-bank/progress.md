@@ -119,8 +119,9 @@ The project roadmap includes:
 - ✅ TCP/IP protocol client implemented
 - ✅ Command processing and response visualization
 - ✅ End-to-end testing with server completed
-- .NET MAUI GUI client design completed
-- Graphical implementation pending
+- ✅ Three-panel GUI design completed 
+- ⏳ Avalonia UI client implementation in progress
+- Graphical implementation underway
 
 ### Protocol Specification
 
@@ -162,17 +163,17 @@ The project roadmap includes:
 
 ## Known Issues
 
-As implementation has not begun, there are no technical issues yet. Key challenges identified include:
+Several technical challenges have been identified and addressed:
 
-1. **TCP/IP in Serverless**: Finding the optimal Azure service for TCP/IP socket handling in a serverless model may require creative approaches or compromise.
+1. ✅ **TCP/IP in Serverless**: Resolved by using Azure Kubernetes Service instead of serverless options for more robust TCP socket support.
 
-2. **Cross-Platform Consistency**: Ensuring consistent experience across macOS and Windows clients will require careful design and testing.
+2. ✅ **Cross-Platform UI Framework**: Encountered significant issues with .NET MAUI on macOS Apple Silicon - resolved by switching to Avalonia UI which offers better native support.
 
-3. **Protocol Extensibility**: Balancing simplicity of initial implementation with future extensibility needs.
+3. ⏳ **Protocol Extensibility**: Balancing simplicity of initial implementation with future extensibility needs.
 
 ## Evolution of Project Decisions
 
-This section will track significant project decisions and their evolution over time.
+This section tracks significant project decisions and their evolution over time.
 
 ### May 15, 2025 - Project Initialization
 
@@ -192,17 +193,25 @@ This section will track significant project decisions and their evolution over t
    - Adopted GitHub Actions for CI/CD pipeline to automate deployment to AKS
    - Rationale: Critical for development without all runtimes installed locally, enables consistent testing and deployment
 
-5. **Client Framework Decision**:
-   - Selected .NET MAUI for cross-platform client development
-   - Rationale: Native integration with .NET ecosystem, cross-platform capabilities, modern UI framework
-
-6. **UI Layout Decision**:
-   - Designed three-panel layout (Client, Protocol, Server)
+5. **UI Layout Decision**:
+   - Designed three-panel layout (Commands, Protocol Interaction, Connection Management)
    - Rationale: Provides clear visualization of the client-server interaction and protocol data flow
 
-7. **Implementation Strategy Decision**:
+6. **Implementation Strategy Decision**:
    - Focus initially on single command implementation with minimal features
    - Rationale: Simplifies debugging of deployment pipeline and infrastructure setup
+
+### May 15, 2025 - Client Framework Revision
+
+7. **Client Framework Decision**:
+   - Initial selection: .NET MAUI for cross-platform client development
+   - Revised decision: Switched to Avalonia UI after encountering significant issues with MAUI on macOS (Apple Silicon)
+   - Rationale for change: 
+     - Avalonia offers better native support for Apple Silicon
+     - Simpler development workflow without special workloads
+     - More consistent cross-platform rendering via Skia
+     - Direct integration with existing .NET protocol client
+     - XAML-based UI similar to WPF/MAUI for familiar development
 
 ## Next Milestones
 

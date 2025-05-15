@@ -2,247 +2,348 @@
 
 ## System Architecture
 
-The SauronVisionProtocol system follows a client-server architecture with the following high-level components:
+SauronVisionProtocol follows a client-server architecture with a custom TCP/IP protocol for communication.
 
 ```mermaid
-graph TD
-    subgraph "Client Applications"
-        C[Console Client] --> P[Protocol Handler]
-        M[macOS Client<br/>(planned)] --> P
-        W[Windows Client<br/>(planned)] --> P
-        P --> UI[User Interface]
+graph TB
+    subgraph "Client (Avalonia UI)"
+        UI[UI Layer]
+        VM[ViewModel Layer]
+        S[Services Layer]
+        PC[Protocol Client]
     end
     
-    subgraph "Azure Kubernetes Service (AKS)"
-        subgraph "Server Pod"
-            NL[.NET TCP Listener] --> CP[Command Processor]
-            CP --> RG[Response Generator]
-        end
+    subgraph "Server (AKS)"
+        PS[Protocol Server]
+        CH[Command Handlers]
+        RG[Response Generators]
     end
     
-    P <--> NL
+    UI --> VM
+    VM --> S
+    S --> PC
+    PC <-->|TCP/IP| PS
+    PS --> CH
+    CH --> RG
+    RG --> PS
 ```
-
-This architecture has been implemented and tested with the console client successfully connecting to the deployed server in Azure Kubernetes Service.
 
 ### Key Components
 
-1. **Protocol Handler**: Implements the SVP protocol, handling the encoding/decoding of commands and responses between client UI and server.
+1. **Protocol Layer**:
+   - Shared protocol definition (.NET library)
+   - Text-based command and response format
+   - Command models (PALANTIR_GAZE, EYE_OF_SAURON, RING_COMMAND)
+   - Response models with status codes and themed messages
 
-2. **User Interface**: Platform-specific GUI implementations that provide consistent experience across supported platforms.
+2. **Client Components**:
+   - UI Layer (Avalonia XAML)
+   - ViewModels (ReactiveUI/MVVM)
+   - Services (Socket Communication)
+   - Protocol Client (TCP/IP implementation)
 
-3. **.NET TCP Listener**: Component running on AKS that establishes and maintains TCP/IP socket connections using .NET 9's networking capabilities.
-
-4. **Command Processor**: Interprets incoming commands according to the SVP specification.
-
-5. **Response Generator**: Creates themed responses based on the processed commands.
+3. **Server Components**:
+   - Socket Listener
+   - Command Processor
+   - Response Formatter
+   - Error Handler
 
 ## Design Patterns
 
-1. **Command Pattern**: Used for encapsulating requests as objects, allowing for parameterization of clients with different requests and queue or log operations.
+### MVVM Architecture (Client)
 
+The client follows the Model-View-ViewModel pattern for clean separation of concerns:
+
+```mermaid
+graph LR
+    View[View - XAML]
+    ViewModel[ViewModel - C#]
+    Model[Model - Protocol Classes]
+    Service[Services]
+    
+    View <-->|Data Binding| ViewModel
+    ViewModel <-->|Properties/Commands| Model
+    ViewModel -->|Calls| Service
+    Service -->|Updates| ViewModel
 ```
-CommandInvoker (Client) -> Command Interface -> ConcreteCommand -> CommandReceiver (Server)
+
+1. **View Layer**:
+   - Avalonia XAML UI components
+   - Data binding to ViewModels
+   - Minimal code-behind
+   - Three-panel layout (Commands, Protocol Interaction, Connection)
+
+2. **ViewModel Layer**:
+   - Observable properties
+   - Command bindings
+   - Data transformation
+   - Service coordination
+   - CommunityToolkit.Mvvm and ReactiveUI
+
+3. **Model Layer**:
+   - Protocol data models
+   - Shared between client and server
+   - Serialization logic
+
+4. **Services Layer**:
+   - IProtocolClientService interface
+   - MockProtocolClientService (for development)
+   - Actual TCP implementation (to be implemented)
+
+### Dependency Injection
+
+```mermaid
+graph TD
+    subgraph "DI Container"
+        VM[ViewModels]
+        S[Services]
+        I[Interfaces]
+    end
+    
+    App[Application] --> DI[DI Container]
+    DI --> VM
+    DI --> S
+    S -.->|implements| I
 ```
 
-2. **Factory Pattern**: For creating platform-specific UI components while maintaining a consistent interface.
+1. **Service Registration**:
+   - Microsoft.Extensions.DependencyInjection
+   - Registered in App.xaml.cs
+   - Singleton services for application lifetime
 
-3. **Adapter Pattern**: To integrate with various Azure services and potentially different network libraries across platforms.
+2. **Constructor Injection**:
+   - ViewModels receive services via constructor
+   - Services are interface-based for testability
+   - Mock implementations for development
 
-4. **Observer Pattern**: For UI updates based on connection status and command responses.
+3. **Service Locator Pattern Avoidance**:
+   - Direct injection rather than service location
+   - Clear dependencies specified at class level
 
-5. **Strategy Pattern**: For different command processing strategies on the server side.
+### Protocol Design
 
-## Communication Flow
+```mermaid
+sequenceDiagram
+    Client->>Server: COMMAND_NAME [parameters]
+    Note over Server: Process Command
+    Server->>Client: STATUS_CODE RESPONSE_TYPE "Message content"
+```
 
-1. Client establishes TCP/IP connection to server
-2. Server acknowledges connection
-3. Client sends command according to SVP format
-4. Server processes command
-5. Server generates response
-6. Client receives and displays response
-7. Connection remains open for additional commands (persistent connection model)
+1. **Text-Based Format**:
+   - Human-readable commands and responses
+   - Space-delimited parameters
+   - Quoted message strings
+   - Status codes similar to HTTP (200, 400, 500)
+
+2. **Command Format**:
+   - Command name in uppercase
+   - Optional parameters separated by spaces
+   - Example: `PALANTIR_GAZE gondor`
+
+3. **Response Format**:
+   - Status code (200 for success, 400/500 for errors)
+   - Response type in uppercase
+   - Message content in quotes
+   - Example: `200 VISION_GRANTED "The eye of Sauron turns to gondor. Armies detected."`
 
 ## Component Relationships
 
-### Client Side
+### Client Stack
 
-- **Platform Layer**: Contains platform-specific implementations
-  - ✅ Implemented: Console-based client for cross-platform usage
-  - Planned: Native UI rendering for macOS/Windows
-  - Handles OS-specific networking considerations
-  
-- **Protocol Layer**: Platform-agnostic implementation of SVP
-  - ✅ Implemented: TCP/IP client with event-based architecture
-  - ✅ Implemented: Command formatting and transmission
-  - ✅ Implemented: Response processing and parsing
-  - ✅ Implemented: Connection state management
-  
-- **UI Layer**: Presents interface to users
-  - ✅ Implemented: Console-based menu system
-  - ✅ Implemented: Connection status display
-  - ✅ Implemented: Command input mechanisms
-  - ✅ Implemented: Response visualization
-  - Planned: Graphical interface with three-panel layout
-
-### Server Side
-
-- **Listener Layer**: Accepts and manages TCP/IP connections
-  - ✅ Implemented: Socket handling and connection management
-  - ✅ Implemented: Connection lifecycle with proper cleanup
-  - ✅ Implemented: Welcome message on connection establishment
-  
-- **Processing Layer**: Interprets and executes commands
-  - ✅ Implemented: Command parsing and validation
-  - ✅ Implemented: PALANTIR_GAZE command handling
-  - ✅ Implemented: Error handling for invalid commands
-  - Planned: Additional command implementations
-  
-- **Response Layer**: Generates themed responses
-  - ✅ Implemented: Protocol-compliant response formatting
-  - ✅ Implemented: Themed Lord of the Rings content generation
-  - ✅ Implemented: Status codes and response types
-  - Planned: Enhanced themed content and additional response types
-
-## Technical Implementation Paths
-
-### Azure Implementation Strategy
-
-The project utilizes Azure Kubernetes Service (AKS) for the server-side implementation, with all infrastructure now successfully provisioned:
-
-1. **Azure Kubernetes Service (AKS)** - ✅ Implemented:
-   - Two-node cluster deployed with Standard_B2s VM size
-   - Resource group: sauron-vision-protocol-rg
-   - Cluster name: sauron-vision-protocol-aks
-   - Leverages managed identity for secure access
-   - Kubectl connected and verified with both nodes showing "Ready" status
-   - Kubernetes version v1.31.7 deployed
-
-2. **Azure Container Registry (ACR)** - ✅ Implemented:
-   - Registry name: sauronvisionacr
-   - Basic SKU for cost efficiency
-   - Admin access enabled
-   - Attached to AKS for pull access
-   - Ready to store Docker container images for server components
-
-3. **.NET 9 on Linux Containers**:
-   - Server container implementation ready for deployment
-   - Docker container configuration defined in Dockerfile
-   - Kubernetes deployment manifests prepared
-   - Implementation leverages .NET's TCP/IP socket capabilities
-
-The implementation follows cloud-native best practices with infrastructure-as-code and prepared automated deployment processes. All Azure resources have been successfully provisioned and are ready for application deployment.
-
-### Client Implementation Options
-
-1. **Electron**:
-   - Pros: Cross-platform, web technologies, rapid development
-   - Cons: Resource usage, package size
-
-2. **Flutter**:
-   - Pros: Cross-platform, native performance, single codebase
-   - Cons: Learning curve, relatively new for desktop
-
-3. **Native Applications** (Swift for macOS, C#/WPF for Windows):
-   - Pros: Best platform integration, performance
-   - Cons: Separate codebases, higher maintenance
-
-4. **React Native**:
-   - Pros: JavaScript ecosystem, code sharing
-   - Cons: Desktop support less mature than mobile
-
-Initial client implementation approach to be determined based on team expertise and specific requirements.
-
-## Protocol Design
-
-SVP follows a text-based protocol format for simplicity of implementation and debugging, now implemented in the shared protocol models:
-
-### Command Format - ✅ Implemented
-
-Commands follow this format:
-```
-[COMMAND_NAME] [PARAM1] [PARAM2] ... [PARAMn]
+```mermaid
+graph TD
+    UI[MainWindow.axaml] --> VM[MainWindowViewModel]
+    VM --> CS[IProtocolClientService]
+    CS --> MC[MockProtocolClientService]
+    CS --> RC[RealClientService]
+    MC -.->|Development| N[No Server Needed]
+    RC -->|Production| TCP[TCP/IP Socket]
+    TCP --> SRV[Server]
+    VM --> CMD[Command Models]
+    VM --> RESP[Response Models]
 ```
 
-Commands are Lord of the Rings/Sauron-themed. Currently implemented:
+### Server Stack
 
-```
-PALANTIR_GAZE [location]    # Directs the Eye of Sauron's gaze to a specific location
-```
-
-Planned future commands:
-```
-EYE_OF_SAURON [intensity] [duration]    # Controls the intensity of the gaze
-RING_COMMAND [minion_type] [action]     # Commands minions to perform actions
-```
-
-### Response Format - ✅ Implemented
-
-Responses follow this format:
-```
-[STATUS_CODE] [RESPONSE_TYPE] "[MESSAGE]"
+```mermaid
+graph TD
+    Listener[Socket Listener] --> Parser[Command Parser]
+    Parser --> Handler[Command Handler]
+    Handler --> RespGen[Response Generator]
+    RespGen --> Formatter[Response Formatter]
+    Formatter --> Sender[Response Sender]
+    
+    Handler --> CMD[Command Models]
+    RespGen --> RESP[Response Models]
 ```
 
-Status codes:
-- `200`: Success
-- `500`: Error
+## Critical Implementation Paths
 
-Response types:
-- `VISION_GRANTED`: The Eye of Sauron successfully directed its gaze
-- `VISION_DENIED`: The Eye of Sauron could not or would not direct its gaze
+### Protocol Communication Flow
 
-Example:
-```
-200 VISION_GRANTED "The eye of Sauron turns to gondor. Armies of 5,000 orcs detected. The white city stands vulnerable."
-```
+1. **Client Connection Establishment**:
+   - TCP socket connection to server IP/port
+   - No authentication in initial implementation
+   - Connection state management
 
-A full protocol specification has been documented in `docs/protocol/specification.md` and implemented in the `shared/protocol/Models/` directory with Command and Response classes.
+2. **Command Submission**:
+   - Client formats command string
+   - Command sent over TCP socket
+   - Server receives and parses command
+
+3. **Command Processing**:
+   - Server identifies command type
+   - Appropriate handler processes command
+   - Response generated based on command
+
+4. **Response Handling**:
+   - Server formats response string
+   - Response sent over TCP socket
+   - Client receives and parses response
+   - UI updated to display response
+
+### Error Handling Strategy
+
+1. **Connection Errors**:
+   - Connection timeouts
+   - Connection refused
+   - Connection lost during operation
+   - Retry logic with exponential backoff
+
+2. **Protocol Errors**:
+   - Malformed commands
+   - Unknown commands
+   - Invalid parameters
+   - Status codes with error descriptions
+
+3. **Server Errors**:
+   - Internal processing errors
+   - Resource limitations
+   - Exception handling and logging
+
+## Security Considerations
+
+While security is limited in the initial proof-of-concept, some key considerations are:
+
+1. **No Authentication**:
+   - Initial implementation has no authentication
+   - Potential future enhancement
+
+2. **No Encryption**:
+   - Traffic is unencrypted
+   - Not suitable for sensitive information
+   - Could be enhanced with TLS in future
+
+3. **Input Validation**:
+   - All client inputs must be validated
+   - Parameter sanitization on server side
+   - Protection against malformed requests
+
+4. **Error Information Leakage**:
+   - Careful control of error details
+   - No stack traces or sensitive information in responses
+
+## Performance Patterns
+
+1. **Asynchronous Communication**:
+   - Non-blocking I/O operations
+   - Async/await pattern throughout
+   - UI responsiveness maintained during network operations
+
+2. **Connection Pooling** (future):
+   - Reuse connections for multiple commands
+   - Reduce connection establishment overhead
+
+3. **Efficient Parsing**:
+   - Minimal string operations
+   - Optimized parsing logic
+   - Reusable message objects
 
 ## Deployment Architecture
 
 ```mermaid
-graph LR
-    subgraph "Development"
-        GR[GitHub Repository]
-    end
-    
-    subgraph "CI/CD (GitHub Actions)"
-        GR --> PathFilter[Path-based Filter]
-        PathFilter -->|Server/Shared changes| Build[Build .NET Container]
-        PathFilter -->|Other changes| Skip[Skip Build]
-        Build --> Push[Push to ACR]
-    end
-    
+graph TB
     subgraph "Azure"
-        Push --> ACR[Azure Container Registry]
-        ACR --> Deploy[Deploy to AKS]
-        Deploy --> AKS[Azure Kubernetes Service]
+        subgraph "Azure Kubernetes Service"
+            P[Pod: SVP Server]
+            P2[Pod: SVP Server]
+            P3[Pod: SVP Server]
+        end
+        
+        SVC[Kubernetes Service]
+        ACR[Azure Container Registry]
     end
     
-    subgraph "Client Distribution"
-        GR --> BuildClients[Build Client Apps]
-        BuildClients --> CC[Console Client]
-        BuildClients -.-> MC[macOS Client<br/>(planned)]
-        BuildClients -.-> WC[Windows Client<br/>(planned)]
-    end
+    GH[GitHub Repository]
+    GHA[GitHub Actions]
+    CLI[Client Applications]
+    
+    GH --> GHA
+    GHA --> ACR
+    ACR --> P
+    ACR --> P2
+    ACR --> P3
+    P --> SVC
+    P2 --> SVC
+    P3 --> SVC
+    CLI --> SVC
 ```
 
-This deployment architecture implements a fully automated CI/CD pipeline through GitHub Actions. The system now includes an optimized workflow with path-based filtering:
+1. **Containerization Strategy**:
+   - .NET 9 server in Docker container
+   - Linux-based container
+   - Minimal image size
+   - Configuration via environment variables
 
-1. When changes are pushed to the repository, the workflow checks which files were modified
-2. If server or shared protocol files are changed, the workflow triggers a build
-3. GitHub Actions builds the Docker container for the server component
-4. Pushes the container image to Azure Container Registry (ACR)
-5. Updates the deployment on Azure Kubernetes Service (AKS)
-6. If only client files are changed, the server build and deployment are skipped
+2. **Kubernetes Deployment**:
+   - Deployment manifest defines replicas
+   - Service exposes TCP port
+   - ConfigMap for configuration
+   - Resource limits defined
 
-This optimized approach provides:
-- ✅ Efficient resource usage by avoiding unnecessary builds
-- ✅ Faster feedback cycles for client-only changes
-- ✅ Consistent, repeatable deployments for server components
-- ✅ Version control for both code and container images
-- ✅ Scalable infrastructure management through Kubernetes
-- ✅ Clear separation between server-side and client-side deployment processes
-- ✅ Manual trigger option for full deployments when needed
+3. **CI/CD Pipeline**:
+   - GitHub Actions workflow
+   - Build and test
+   - Push to Azure Container Registry
+   - Deploy to Azure Kubernetes Service
+   - Automated validation
 
-This pipeline has been successfully implemented and tested, with the server component deployed and verified in Azure Kubernetes Service.
+## Design Decisions
+
+### Why Avalonia UI?
+
+- **Decision**: Use Avalonia UI instead of .NET MAUI for the client application.
+- **Rationale**: 
+  - Better native support for Apple Silicon (ARM64)
+  - More consistent cross-platform rendering via Skia
+  - No platform-specific workloads required
+  - XAML-based UI familiar to WPF/.NET developers
+- **Alternatives Considered**:
+  - .NET MAUI: Rejected due to Apple Silicon issues
+  - Electron: Rejected due to performance and bundling concerns
+  - Platform-specific clients: Rejected due to code duplication
+
+### Why Azure Kubernetes Service?
+
+- **Decision**: Use AKS rather than Azure Functions or App Service.
+- **Rationale**:
+  - Better support for TCP socket handling
+  - Custom container deployment
+  - Potential for scaling
+  - Managed Kubernetes simplifies operations
+- **Alternatives Considered**:
+  - Azure Functions: Rejected due to HTTP focus and socket limitations
+  - Azure App Service: Rejected due to TCP socket constraints
+  - Azure Container Instances: Viable but less scalable
+
+### Why Text-Based Protocol?
+
+- **Decision**: Implement a text-based rather than binary protocol.
+- **Rationale**:
+  - Easier debugging and development
+  - Human-readable for educational purposes
+  - Simpler extension and documentation
+  - More aligned with the proof-of-concept nature
+- **Alternatives Considered**:
+  - Binary protocol: More efficient but harder to debug
+  - JSON/XML: More verbose without significant benefits for this use case

@@ -2,142 +2,123 @@
 
 ## Current Work Focus
 
-The SauronVisionProtocol project has successfully progressed from infrastructure setup to a fully functional end-to-end implementation. The current focus is on:
+We are developing a proof-of-concept TCP/IP protocol called "Sauron Vision Protocol" with a client-server architecture. 
 
-1. **Protocol Enhancement**: Extending the protocol with additional commands beyond PALANTIR_GAZE.
+### May 15, 2025 - Initial Setup and Implementation
 
-2. **Client Application Enhancement**: Building on the successful console client to develop a more robust graphical interface.
+We have successfully:
 
-3. **Monitoring & Observability**: Setting up comprehensive monitoring and logging for the deployed application.
-
-4. **CI/CD Pipeline Optimization**: Refining the development workflow for more efficient iteration.
-
-5. **Documentation & Knowledge Base**: Maintaining comprehensive documentation based on operational experience.
+1. Initialized the project structure with proper documentation using Memory Bank.
+2. Selected our technology stack:
+   - Server: .NET 9 on Azure Kubernetes Service
+   - Client: Avalonia UI for cross-platform (macOS/Windows) compatibility
+   - Protocol: Text-based TCP/IP custom protocol
+3. Created initial client-side UI implementation:
+   - Three-panel layout (Commands, Protocol Interaction, Connection Management)
+   - MVVM architecture with proper dependency injection
+   - Mock protocol client service for development
+4. Defined the protocol structure:
+   - Command format (command_name [parameters])
+   - Response format (status_code response_type "message")
+   - Three initial commands: PALANTIR_GAZE, EYE_OF_SAURON, RING_COMMAND
 
 ## Recent Changes
 
-1. **Console Client Implementation**: 
-   - Successfully implemented a console-based client application
-   - Created robust TCP/IP protocol client with event-based architecture
-   - Implemented interactive command interface with user-friendly menu
-   - Verified end-to-end functionality with deployed server
-   - Validated themed response parsing and display
+1. **Client Framework Decision**: We initially considered .NET MAUI but switched to Avalonia UI when we discovered MAUI has limitations on macOS (especially Apple Silicon).
+   
+2. **Protocol Design**: Implemented a text-based protocol with JSON-like structure for readability and debugging.
+   
+3. **UI Pattern**: Adopted a three-panel layout showing:
+   - Available commands (left panel)
+   - Command output and interaction (center panel)
+   - Connection management (right panel)
 
-2. **CI/CD Pipeline Optimization**:
-   - Added path-based filtering to GitHub Actions workflow
-   - Configured workflow to trigger only on server and shared code changes
-   - Maintained manual trigger option for full deployments
-   - Enhanced build process efficiency
-
-3. **End-to-End Testing and Verification**:
-   - Successfully tested command and response flow through the protocol
-   - Verified correct implementation of the PALANTIR_GAZE command
-   - Validated error handling for edge cases
-   - Confirmed proper themed response generation is working
-   - Established reliable connectivity with Azure-hosted services
-
-4. **Project Structure Enhancement**:
-   - Organized client implementations into structured components
-   - Separated console and graphical client concerns
-   - Established clean separation between protocol and UI layers
-   - Created foundation for future client expansion
-
-4. **Technology Stack Finalization**:
-   - Confirmed .NET 9 on AKS as server platform
-   - Verified Azure Kubernetes Service capability for TCP/IP services
-   - Selected .NET MAUI for client development
-   - Designed CI/CD pipeline with GitHub Actions
+4. **Protocol Implementation**: Created shared command and response models in the protocol library.
 
 ## Next Steps
 
-Immediate next steps include:
+### Immediate Tasks
 
-1. **Protocol Extension**:
-   - Implement EYE_OF_SAURON command with intensity and duration parameters
-   - Add RING_COMMAND for controlling minions with different action types
-   - Enhance response formatting with more detailed themed content
-   - Implement additional response types for varied interactions
-   - Improve command parameter validation and error messaging
+1. **Implement real protocol client**:
+   - Add real TCP/IP socket implementation
+   - Connect to mock server for testing
 
-2. **GUI Client Development**: 
-   - Resolve .NET MAUI setup issues for cross-platform compatibility
-   - Implement graphical three-panel layout as designed
-   - Create visually compelling protocol visualization
-   - Enhance the client with theming to match the Lord of the Rings aesthetic
-   - Implement connection management and state persistence
+2. **Server-side implementation**:
+   - Set up basic server architecture in .NET 9
+   - Create Docker container for deployment to AKS
+   - Configure socket listening and command processing
 
-3. **Monitoring Enhancement**:
-   - Configure Azure Monitor for container insights
-   - Set up custom metrics for protocol usage and command statistics
-   - Create dashboards for system health and performance visualization
-   - Implement alerting for critical conditions and error rates
-   - Add structured logging for better operational visibility
+3. **Protocol Refinement**:
+   - Add validation and error handling
+   - Implement proper command parsing
+   - Add protocol versioning support
 
-4. **Security Improvements**:
-   - Add basic authentication to the protocol
-   - Implement command authorization rules
-   - Consider TLS encryption for the TCP connections
-   - Add rate limiting for connection attempts
-   - Implement IP-based access controls for the service
+### Medium-Term Tasks
 
-5. **Testing Automation**:
-   - Create automated test suite for the protocol commands
-   - Implement integration tests for client-server interactions
-   - Add performance benchmarking for the server component
-   - Set up CI/CD-integrated tests for deployment validation
+1. **Azure Setup**:
+   - Deploy server to Azure Kubernetes Service
+   - Set up monitoring and logging
+   - Configure network security
+
+2. **CI/CD Pipeline**:
+   - Create GitHub Actions workflow
+   - Automate deployment to Azure
+   - Set up testing and validation
+
+3. **Client Enhancements**:
+   - Add theming with Lord of the Rings / Sauron aesthetic
+   - Improve visualization of command responses
+   - Support for command history and favorites
 
 ## Active Decisions and Considerations
 
-Current decisions being evaluated:
+1. **Protocol Format Decision**: 
+   - Using a text-based format for better debugging and readability
+   - Format: `COMMAND_NAME parameter1 parameter2` for requests
+   - Format: `status_code RESPONSE_TYPE "message"` for responses
+   - Example: `200 VISION_GRANTED "The eye of Sauron turns to gondor. Armies detected."`
 
-1. **AKS Monitoring and Scaling**:
-   - **Decision Needed**: Configuration for monitoring and auto-scaling AKS
-   - **Considerations**: Cost vs. performance, alert thresholds, scaling triggers
-   - **Current Leaning**: Start with basic monitoring and manual scaling, implement auto-scaling after initial deployment
+2. **Cross-Platform Strategy**:
+   - Avalonia UI selected for better native support on macOS Apple Silicon
+   - Shared protocol library (.NET Standard) for client/server code reuse
+   - Containerized server deployment for platform independence
 
-2. **Client Implementation Priority**:
-   - **Decision Needed**: Which client components to prioritize in development
-   - **Considerations**: Technical demonstration value, development complexity, user experience
-   - **Current Leaning**: Focus first on protocol visualization panel as it demonstrates the core project concept
+3. **MVVM Implementation**:
+   - Using proper dependency injection for loosely coupled components
+   - Mock service implementation for client development without server
+   - Command bindings for UI interactions
+   - Observable collections and properties for reactive UI
 
-3. **Network Security**:
-   - **Decision Needed**: Security measures for TCP/IP communication
-   - **Considerations**: Authentication, encryption, network policies
-   - **Current Leaning**: Start with basic security and improve iteratively
-
-4. **Testing Environments**:
-   - **Decision Needed**: How to structure testing across environments
-   - **Considerations**: Development, staging, and production separation
-   - **Current Leaning**: Use namespaces in AKS to separate environments
+4. **Lord of the Rings Theming**:
+   - Command naming convention based on Sauron's abilities
+   - Response messages themed around Middle-earth locations and characters
+   - Will eventually add visual theming to match the aesthetic
 
 ## Important Patterns and Preferences
 
-1. **Code Organization**: Clear separation between client and server code, with shared protocol definitions in a common module.
+1. **Coding Patterns**:
+   - Use dependency injection for all services
+   - Leverage MVVM pattern for UI separation of concerns
+   - Implement both mock and real services with shared interfaces
+   - Use strongly-typed models for protocol messages
 
-2. **Documentation First**: Defining specifications and interfaces before implementation to ensure clarity and alignment.
+2. **Architecture Preferences**:
+   - Separation between protocol, client, and server components
+   - Shared code in protocol library
+   - Client-side reactive UI patterns
+   - Server-side command handling with proper error management
 
-3. **Consistent Theming**: All components should maintain the Lord of the Rings/Sauron theme in naming, messaging, and visual elements.
-
-4. **Modular Architecture**: Designing components with clear interfaces to allow for future extensions or replacements.
-
-5. **Test-Driven Development**: Creating tests alongside feature implementation to ensure reliability and facilitate refactoring.
+3. **Project Structure**:
+   - `/client/avalonia`: Avalonia UI client for macOS and Windows
+   - `/shared/protocol`: Shared protocol models and utilities
+   - `/server`: Server implementation (to be created)
 
 ## Learnings and Project Insights
 
-As we progress with implementation, several key learnings have emerged:
+1. **.NET MAUI vs Avalonia**: We learned that Avalonia offers better support for macOS Apple Silicon than .NET MAUI, which has limitations and requires special workloads.
 
-1. **Azure Resource Provider Registration**: Working with Azure services requires explicit registration of resource providers, which can be a one-time hurdle for new subscriptions but is straightforward to resolve.
+2. **TCP/IP in Azure**: Discovered that Azure Kubernetes Service is better suited for our custom TCP/IP protocol than serverless options like Azure Functions.
 
-2. **AKS Provisioning Time**: Creating an AKS cluster takes significant time (5-15 minutes), which needs to be factored into development and CI/CD planning.
+3. **Protocol Design**: Text-based protocols are easier to debug and extend compared to binary protocols, which is valuable for a proof-of-concept.
 
-3. **Dependency Management**: The interdependencies between Azure services (ACR, AKS) require careful planning of setup sequence and permissions.
-
-4. **Documentation Importance**: Clear, detailed documentation with troubleshooting information is essential, especially for processes that involve multiple services and potential points of failure.
-
-5. **CLI vs Portal**: While the Azure portal provides a visual interface, using the Azure CLI enables automation and reproducibility, which is crucial for CI/CD pipelines.
-
-6. **Multi-service Architecture**: The SauronVisionProtocol's architecture spans multiple services (AKS, ACR, GitHub), highlighting the importance of consistent authentication and configuration across services.
-
-7. **Kubernetes Learning Curve**: While powerful, Kubernetes has a significant learning curve; starting with a minimal configuration and building up complexity is an effective approach.
-
-8. **Cross-platform Considerations**: Using .NET technologies provides good cross-platform capabilities but requires careful testing across environments.
+4. **UI Architecture**: Using MVVM with dependency injection allows for easier testing and separation between UI and business logic.
