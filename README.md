@@ -13,6 +13,10 @@ SauronVisionProtocol (SVP) demonstrates a custom TCP/IP protocol implementation 
 
 The protocol transforms technical networking concepts into an engaging, themed experience while showcasing modern cloud-native development practices. The initial implementation focuses on a simple command set and deployment pipeline, which will be expanded upon once the infrastructure is proven.
 
+### Project Walkthrough Video
+
+[![SauronVisionProtocol Walkthrough](https://img.youtube.com/vi/3JG9uW9BsgQ/0.jpg)](https://www.youtube.com/watch?v=3JG9uW9BsgQ)
+
 ### Avalonia Client GUI
 
 ![Sauron Vision Protocol Client GUI](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/AvaloniaGUI.png)
