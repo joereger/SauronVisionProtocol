@@ -13,6 +13,10 @@ SauronVisionProtocol (SVP) demonstrates a custom TCP/IP protocol implementation 
 
 The protocol transforms technical networking concepts into an engaging, themed experience while showcasing modern cloud-native development practices. The initial implementation focuses on a simple command set and deployment pipeline, which will be expanded upon once the infrastructure is proven.
 
+### Avalonia Client GUI
+
+![Sauron Vision Protocol Client GUI](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/AvaloniaGUI.png)
+
 ## Technology Stack
 
 ### Server-Side
@@ -92,6 +96,23 @@ graph LR
 
 This deployment approach is especially important as development happens on macOS without all runtimes installed locally.
 
+## GitHub Actions
+
+The project uses GitHub Actions for CI/CD. Here are some screenshots of the workflow in action:
+
+**Workflow Run Summary:**
+![GitHub Actions Workflow Run](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/GitHubActions-01.png)
+
+**Build and Deploy Job Details:**
+![GitHub Actions Build and Deploy Job](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/GitHubActions-02.png)
+
+## Azure Resources
+
+The server-side components are deployed to Azure Kubernetes Service (AKS) and utilize Azure Container Registry (ACR).
+
+**Azure Resource Group Overview:**
+![Azure Resources for SVP](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/AzureResources.png)
+
 ## Development Workflow
 
 Since development occurs on macOS without all required runtimes, the workflow is designed to leverage cloud resources:
@@ -123,10 +144,6 @@ The client application features a three-panel layout:
 - **Right Panel (Server Azure App)**: Server connection details and visual status indicator (Eye of Sauron).
 
 This design allows technical users to see both the themed interface and the underlying protocol details simultaneously.
-
-### Avalonia Client GUI
-
-![Sauron Vision Protocol Client GUI](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/AvaloniaGUI.png)
 
 ## Setup Instructions
 
@@ -202,23 +219,6 @@ The initial development will focus on:
 4. **Basic Client**: Minimal Avalonia UI interface with the three-panel layout
 
 This approach allows us to focus on getting the deployment pipeline working correctly before adding complexity to the application logic.
-
-## GitHub Actions
-
-The project uses GitHub Actions for CI/CD. Here are some screenshots of the workflow in action:
-
-**Workflow Run Summary:**
-![GitHub Actions Workflow Run](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/GitHubActions-01.png)
-
-**Build and Deploy Job Details:**
-![GitHub Actions Build and Deploy Job](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/GitHubActions-02.png)
-
-## Azure Resources
-
-The server-side components are deployed to Azure Kubernetes Service (AKS) and utilize Azure Container Registry (ACR).
-
-**Azure Resource Group Overview:**
-![Azure Resources for SVP](client/avalonia/SauronVisionProtocol.Client.Avalonia/Assets/Images/AzureResources.png)
 
 ## License
 
