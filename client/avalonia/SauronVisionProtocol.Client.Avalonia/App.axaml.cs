@@ -52,10 +52,8 @@ public partial class App : Application
         services.AddSingleton<MainWindowViewModel>();
         
         // Register Services
-        services.AddSingleton<IProtocolClientService, MockProtocolClientService>();
-        
-        // In the future, we'll replace the mock with a real implementation:
-        // services.AddSingleton<IProtocolClientService, ProtocolClientService>();
+        // services.AddSingleton<IProtocolClientService, MockProtocolClientService>(); // Use this for offline UI development
+        services.AddSingleton<IProtocolClientService, RealProtocolClientService>(); // Use this to connect to the live server
     }
     
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)

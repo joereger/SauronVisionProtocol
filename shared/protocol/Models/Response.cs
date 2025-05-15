@@ -117,28 +117,39 @@ public class Response
     /// <summary>
     /// Creates an error response for commands that fail
     /// </summary>
-    public static Response CreateErrorResponse(string commandName, string errorMessage)
+    public static Response CreateErrorResponse(string commandName, string errorMessage, int statusCode = 400) // Default to 400 for client errors
     {
         string responseType = commandName.ToUpperInvariant() switch
         {
-            "PALANTIR_GAZE" => "VISION_DENIED",
-            "EYE_OF_SAURON" => "GAZE_UNCHANGED",
-            "RING_COMMAND" => "MINIONS_RESISTING",
-            _ => "COMMAND_FAILED"
+            "PALANTIR_GAZE" => "VISION_DENIED",          // Specific client error type
+            "EYE_OF_SAURON" => "GAZE_UNCHANGED",        // Specific client error type
+            "RING_COMMAND" => "MINIONS_RESISTING",       // Specific client error type
+            "INTERNAL_SERVER_ERROR" => "INTERNAL_ERROR", // Server-side error
+            "INVALID_FORMAT" => "COMMAND_INVALID",       // Client-side format error
+            // If commandName is "UNKNOWN_COMMAND" or something not listed, it will fall to default.
+            _ => "COMMAND_FAILED" // Generic failure for the given command
         };
+
+        // Override status code for true internal server errors
+        if (commandName.Equals("INTERNAL_SERVER_ERROR", StringComparison.OrdinalIgnoreCase))
+        {
+            statusCode = 500;
+        }
+        // Ensure specific client errors that might imply "Not Found" or "Not Implemented" could also be handled
+        // For now, most client input errors will be 400.
         
-        return new Response(500, responseType, errorMessage);
+        return new Response(statusCode, responseType, errorMessage);
     }
     
     /// <summary>
-    /// Creates a response for unknown commands
+    /// Creates a response for unparseable/unknown commands (specific 400 error)
     /// </summary>
-    public static Response CreateUnknownCommandResponse()
+    public static Response CreateUnknownCommandFormatResponse() // Renamed for clarity
     {
         return new Response(
-            400,
-            "COMMAND_UNKNOWN",
-            "The Dark Lord does not recognize this command. The Eye turns away in disinterest. Go away, fool!"
+            400, // Bad Request
+            "COMMAND_INVALID_FORMAT", // More specific type
+            "The runes are unreadable; the command format is not recognized by the Dark Lord."
         );
     }
 

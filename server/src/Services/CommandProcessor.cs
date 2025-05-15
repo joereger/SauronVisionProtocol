@@ -26,18 +26,35 @@ public class CommandProcessor : ICommandProcessor
         if (command == null)
         {
             _logger.LogWarning("Invalid command format: {Command}", commandString);
-            return Task.FromResult(Response.CreateErrorResponse("UNKNOWN_COMMAND", "Invalid command format").ToProtocolString());
+            // Use the new specific method for invalid format
+            return Task.FromResult(Response.CreateUnknownCommandFormatResponse().ToProtocolString());
         }
         
-        // Process based on command type
-        Response response = command switch
+        Response response;
+        try
         {
-            PalantirGazeCommand palantirGazeCommand => ProcessPalantirGazeCommand(palantirGazeCommand),
-            _ => Response.CreateErrorResponse(command.CommandName, $"Unsupported command: {command.CommandName}")
-        };
+            // Process based on command type
+            response = command switch
+            {
+                PalantirGazeCommand palantirGazeCommand => ProcessPalantirGazeCommand(palantirGazeCommand),
+                EyeOfSauronCommand eyeOfSauronCommand => ProcessEyeOfSauronCommand(eyeOfSauronCommand),
+                RingCommand ringCommand => ProcessRingCommand(ringCommand),
+                // Handle cases where Command.FromProtocolString might return a base Command type or an unknown derived type
+                _ => Response.CreateErrorResponse(command.CommandName, $"The command '{command.CommandName}' is recognized but not yet fully wielded by the server.", 404) // 404 Not Found or 501 Not Implemented
+            };
+        }
+        catch (ArgumentException ex) // Catch specific parameter validation errors
+        {
+            _logger.LogWarning(ex, "Invalid parameter for command {CommandName}: {ErrorMessage}", command.CommandName, ex.Message);
+            response = Response.CreateErrorResponse(command.CommandName, ex.Message); // Defaults to 400
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error processing command {CommandString}", commandString);
+            response = Response.CreateErrorResponse("INTERNAL_SERVER_ERROR", "A shadow falls upon the server; an unexpected error occurred."); // This will set statusCode to 500
+        }
         
         _logger.LogInformation("Generated response: {Response}", response.ToProtocolString());
-        
         return Task.FromResult(response.ToProtocolString());
     }
 
@@ -45,13 +62,39 @@ public class CommandProcessor : ICommandProcessor
     {
         _logger.LogInformation("Processing PALANTIR_GAZE command for location: {Location}", command.Location);
         
-        // Check if the location is empty or invalid
-        if (string.IsNullOrWhiteSpace(command.Location))
+        if (string.IsNullOrWhiteSpace(command.Location) || command.Location.Equals("unknown", StringComparison.OrdinalIgnoreCase))
         {
-            return Response.CreateErrorResponse(command.CommandName, "Location cannot be empty");
+            // Using ArgumentException for parameter validation, which will be caught above
+            throw new ArgumentException("A specific location must be named for the Palantir's gaze.");
         }
         
-        // Generate vision response for the location
         return Response.CreateVisionGrantedResponse(command.Location);
+    }
+
+    private Response ProcessEyeOfSauronCommand(EyeOfSauronCommand command)
+    {
+        _logger.LogInformation("Processing EYE_OF_SAURON command with intensity: {Intensity}", command.Intensity);
+
+        if (command.Intensity < 1 || command.Intensity > 10)
+        {
+            throw new ArgumentException("The Eye's intensity must be a value between 1 and 10.");
+        }
+
+        // For now, just acknowledge. Actual logic for different intensities can be added.
+        return Response.CreateGazeIntensifiedResponse(command.Intensity);
+    }
+
+    private Response ProcessRingCommand(RingCommand command)
+    {
+        _logger.LogInformation("Processing RING_COMMAND with action: {Action}", command.Action);
+
+        if (string.IsNullOrWhiteSpace(command.Action) || command.Action.Equals("assemble", StringComparison.OrdinalIgnoreCase))
+        {
+            // Default action "assemble" might require specific handling or be disallowed if parameters are expected
+            throw new ArgumentException("A specific action must be commanded of the minions.");
+        }
+        
+        // For now, just acknowledge. Actual logic for different actions can be added.
+        return Response.CreateMinionsObeyingResponse(command.Action);
     }
 }

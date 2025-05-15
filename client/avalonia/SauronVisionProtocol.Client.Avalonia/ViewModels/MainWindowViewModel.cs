@@ -15,7 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase
     
     // Connection properties
     [ObservableProperty]
-    private string _serverHost = "sauronvisionprotocol.eastus.cloudapp.azure.com";
+    private string _serverHost = "135.237.4.223";
 
     [ObservableProperty]
     private string _serverPort = "9000";
