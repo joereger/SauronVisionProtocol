@@ -96,31 +96,30 @@ CommandInvoker (Client) -> Command Interface -> ConcreteCommand -> CommandReceiv
 
 ### Azure Implementation Strategy
 
-The project will utilize Azure Kubernetes Service (AKS) for the server-side implementation:
+The project utilizes Azure Kubernetes Service (AKS) for the server-side implementation, with all infrastructure now successfully provisioned:
 
-1. **Azure Kubernetes Service (AKS)**:
-   - Pros: 
-     - Excellent support for containerized applications
-     - Robust orchestration capabilities
-     - Scalable architecture
-     - Support for persistent TCP/IP connections
-     - Mature monitoring and management tools
-   - Cons:
-     - More complex initial setup than serverless options
-     - Requires Kubernetes knowledge
-     - Potentially higher base cost than serverless for low-traffic scenarios
+1. **Azure Kubernetes Service (AKS)** - ✅ Implemented:
+   - Two-node cluster deployed with Standard_B2s VM size
+   - Resource group: sauron-vision-protocol-rg
+   - Cluster name: sauron-vision-protocol-aks
+   - Leverages managed identity for secure access
+   - Kubectl connected and verified with both nodes showing "Ready" status
+   - Kubernetes version v1.31.7 deployed
 
-2. **Azure Container Registry (ACR)**:
-   - Used for storing and managing Docker container images
-   - Integrated with the CI/CD pipeline via GitHub Actions
-   - Provides version control for container images
+2. **Azure Container Registry (ACR)** - ✅ Implemented:
+   - Registry name: sauronvisionacr
+   - Basic SKU for cost efficiency
+   - Admin access enabled
+   - Attached to AKS for pull access
+   - Ready to store Docker container images for server components
 
 3. **.NET 9 on Linux Containers**:
-   - Leverages .NET's cross-platform capabilities
-   - Utilizes native .NET TCP/IP socket implementations
-   - Runs efficiently in containerized environments
+   - Server container implementation ready for deployment
+   - Docker container configuration defined in Dockerfile
+   - Kubernetes deployment manifests prepared
+   - Implementation leverages .NET's TCP/IP socket capabilities
 
-The implementation will follow cloud-native best practices with infrastructure-as-code and automated deployment processes.
+The implementation follows cloud-native best practices with infrastructure-as-code and prepared automated deployment processes. All Azure resources have been successfully provisioned and are ready for application deployment.
 
 ### Client Implementation Options
 
@@ -144,32 +143,48 @@ Initial client implementation approach to be determined based on team expertise 
 
 ## Protocol Design
 
-SVP follows a text-based protocol format for simplicity of implementation and debugging:
+SVP follows a text-based protocol format for simplicity of implementation and debugging, now implemented in the shared protocol models:
 
+### Command Format - ✅ Implemented
+
+Commands follow this format:
 ```
 [COMMAND_NAME] [PARAM1] [PARAM2] ... [PARAMn]
 ```
 
-Commands will be Lord of the Rings/Sauron-themed, such as:
+Commands are Lord of the Rings/Sauron-themed. Currently implemented:
 
 ```
-PALANTIR_GAZE target_location
-EYE_OF_SAURON scan_intensity scan_duration
-RING_COMMAND minion_type action_type
+PALANTIR_GAZE [location]    # Directs the Eye of Sauron's gaze to a specific location
 ```
 
-Responses follow a similar format:
+Planned future commands:
+```
+EYE_OF_SAURON [intensity] [duration]    # Controls the intensity of the gaze
+RING_COMMAND [minion_type] [action]     # Commands minions to perform actions
+```
 
+### Response Format - ✅ Implemented
+
+Responses follow this format:
 ```
-[STATUS_CODE] [RESPONSE_TYPE] [MESSAGE]
+[STATUS_CODE] [RESPONSE_TYPE] "[MESSAGE]"
 ```
+
+Status codes:
+- `200`: Success
+- `500`: Error
+
+Response types:
+- `VISION_GRANTED`: The Eye of Sauron successfully directed its gaze
+- `VISION_DENIED`: The Eye of Sauron could not or would not direct its gaze
 
 Example:
 ```
-200 VISION_GRANTED "The eye of Sauron turns to Gondor. Armies of 5000 orcs detected."
+200 VISION_GRANTED "The eye of Sauron turns to gondor. Armies of 5,000 orcs detected. The white city stands vulnerable."
 ```
 
-A full protocol specification will be developed as the project progresses.
+A full protocol specification has been documented in `docs/protocol/specification.md` and implemented in the `shared/protocol/Models/` directory with Command and Response classes.
 
 ## Deployment Architecture
 

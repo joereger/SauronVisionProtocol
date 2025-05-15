@@ -5,8 +5,49 @@ This guide walks through setting up the necessary Azure resources for deploying 
 ## Prerequisites
 
 - Azure account with an active subscription
-- Azure CLI installed on your development machine
-- `kubectl` command-line tool
+- Azure CLI installed on your development machine (see below for installation)
+- `kubectl` command-line tool (see below for installation)
+
+### Installing Azure CLI on macOS
+
+```bash
+# Using Homebrew (recommended)
+brew update
+brew install azure-cli
+
+# Verify installation
+az --version
+```
+
+For other installation methods, see the [official Azure CLI documentation](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
+
+### Installing kubectl on macOS
+
+```bash
+# Using Homebrew (recommended)
+brew install kubectl
+
+# Verify installation
+kubectl version --client
+```
+
+Alternatively, you can install kubectl directly:
+
+```bash
+# Download the latest release
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/amd64/kubectl"
+
+# Make the kubectl binary executable
+chmod +x ./kubectl
+
+# Move kubectl to a directory in your PATH
+sudo mv ./kubectl /usr/local/bin/kubectl
+
+# Verify the installation
+kubectl version --client
+```
+
+For Windows or Linux installation instructions, see the [official Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/).
 
 ## 1. Resource Provider Registration
 
