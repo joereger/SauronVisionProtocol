@@ -181,6 +181,40 @@ This design allows technical users to see both the themed interface and the unde
 
 4. For full setup of AKS and deployment pipeline, refer to [detailed setup documentation](docs/setup/README.md)
 
+### Running the Local Client
+
+#### macOS
+
+```bash
+# Navigate to client directory
+cd client/avalonia/SauronVisionProtocol.Client.Avalonia
+
+# Build and run in one command
+dotnet run
+
+# Or build separately
+dotnet build
+
+# Then run from build output
+dotnet bin/Debug/net9.0/SauronVisionProtocol.Client.Avalonia.dll
+```
+
+#### Windows
+
+```cmd
+# Navigate to client directory
+cd client\avalonia\SauronVisionProtocol.Client.Avalonia
+
+# Build and run in one command
+dotnet run
+
+# Or build separately
+dotnet build
+
+# Then run from build output
+dotnet bin\Debug\net9.0\SauronVisionProtocol.Client.Avalonia.dll
+```
+
 ## Protocol Description
 
 The SauronVisionProtocol uses a text-based format for commands and responses:
